@@ -466,6 +466,29 @@ share an origin, which this free-tier split does not.
 
 ---
 
+## Scaling Notes
+
+Free tiers by design (see above), but that's a cost choice, not a ceiling on the
+architecture:
+
+- **Reads scale for free.** Every route is prerendered static HTML served from GitHub
+  Pages' CDN — visitor traffic never touches the API, Firestore or Cloudinary. Swapping in
+  Cloudflare Pages/R2 removes the 100 GB/month cap with no code changes.
+- **Writes are one instance.** The admin API is a single stateless (JWT) Render process, so
+  horizontal scaling is mostly just adding instances — except the per-IP rate limiter and
+  login-lockout counter live in that process's memory/Firestore state and would need a
+  shared store (Redis) first, or each instance would enforce its own limit independently.
+- **Firestore quotas track edits, not visitors.** The public site never reads Firestore
+  directly, so the 50k reads/20k writes-a-day cap scales with admin activity, not traffic.
+- **Content propagation, not requests, is the real latency.** Edits reach prerendered pages
+  on the next build (weekly, or manual). Higher edit frequency would want a
+  webhook-triggered rebuild instead of a cron.
+- **Observability is grep-the-log today.** Fine at this scale; the next step is routing the
+  existing error-boundary/`/api/client-errors` pipe into a real APM (Sentry, Datadog)
+  instead of rewriting it.
+
+---
+
 ## Managing Content
 
 Sections live in `packages/shared/src/index.ts` as the bundled defaults; admin-portal edits
