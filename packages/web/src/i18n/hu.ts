@@ -1,0 +1,142 @@
+import type { Dict } from './index';
+
+// Hungarian strings. Must match the shape of en.ts (enforced by the Dict type).
+export const hu: Dict = {
+  meta: {
+    title: 'Kovács | KÖLTÉSZET',
+  },
+  error: {
+    title: 'Hiba történt',
+    body: 'Ezt az oldalt nem sikerült megjeleníteni. A versek továbbra is elérhetők.',
+    retry: 'Újrapróbálom',
+    home: 'Vissza a főoldalra',
+  },
+  home: {
+    heading: 'Kovács versei',
+  },
+  notFound: {
+    title: 'A lap nem található',
+    body: 'Ez a cím nem vezet sehová. Elképzelhető, hogy elgépelés történt, vagy az oldal átkerült máshová.',
+    poems: 'Versek böngészése',
+    home: 'Vissza a főoldalra',
+  },
+  privacy: {
+    title: 'Adatkezelés',
+    updated: 'Utoljára frissítve: 2026. július',
+    collectTitle: 'Milyen adatokat gyűjtünk',
+    collectBody:
+      'Kizárólag azt, amit a kapcsolatfelvételi űrlapba ír: a nevét, e-mail-címét, a tárgyat és az üzenetet. Ezen kívül semmilyen adatot nem gyűjtünk Önről, és az oldalon nincs semmiféle analitika vagy nyomkövetés.',
+    useTitle: 'Mire használjuk',
+    useBody:
+      'Az üzenetet e-mailben továbbítjuk az oldal tulajdonosának, hogy elolvashassa és válaszolhasson rá. Másra nem használjuk, marketingcélra soha.',
+    sharingTitle: 'Ki láthatja még',
+    sharingBody:
+      'Az üzenet a Resend levélküldő szolgáltatáson keresztül jut el a tulajdonos postafiókjába. Az oldalt a GitHub Pages szolgálja ki, a kapcsolatfelvételi űrlapot egy Renderen futó szerver kezeli, a képeket pedig a Cloudinary — mint minden weboldal esetében, ezek a szolgáltatók látják, milyen IP-címről csatlakozik a böngészője. Adatait nem adjuk el és nem osztjuk meg mással.',
+    retentionTitle: 'Meddig őrizzük',
+    retentionBody:
+      'Az üzenet semmilyen adatbázisban nem tárolódik — kizárólag e-mailként létezik a tulajdonos postafiókjában, ameddig a válaszadáshoz szükséges. Az automatizált visszaélések ellen a szerver egy órán át emlékszik az űrlapot beküldő IP-címekre.',
+    cookiesTitle: 'Sütik',
+    cookiesBody:
+      'Nincsenek. A világos vagy sötét megjelenésre vonatkozó beállítását a saját böngészője jegyzi meg, és az soha nem hagyja el a készülékét.',
+    rightsTitle: 'Az Ön jogai',
+    rightsBody:
+      'Kérheti, hogy megtudja, milyen adatot őrzünk Önről, kérhet róla másolatot, és kérheti a törlését. Ehhez használja a kapcsolatfelvételi űrlapot, vagy válaszoljon bármelyik kapott e-mailre.',
+  },
+  nav: {
+    home: 'Főoldal',
+    poems: 'Versek',
+    contact: 'Kapcsolat',
+    admin: 'Admin',
+    logout: 'Kijelentkezés',
+  },
+  header: {
+    subtitle: 'KÖLTÉSZET',
+    menu: 'Menü',
+  },
+  footer: {
+    copyright: '© Peter de Keijzer 2026',
+    backToTop: 'Vissza a tetejére',
+  },
+  carousel: {
+    featured: 'Kiemelt versek',
+    readMore: 'Tovább',
+    prev: 'Előző',
+    next: 'Következő',
+  },
+  poems: {
+    heading: 'Versek',
+    index: 'Tartalom',
+    back: '← Versek',
+    more: 'Több vers',
+    loading: 'Betöltés…',
+    notFound: 'A vers nem található.',
+    prevPage: 'A vers előző oldala',
+    nextPage: 'A vers következő oldala',
+  },
+  theme: {
+    toDark: 'Váltás sötét módra',
+    toLight: 'Váltás világos módra',
+  },
+  contact: {
+    title: 'Kapcsolat',
+    success: 'Köszönöm az üzenetét! Amint lehet, válaszolok Önnek.',
+    name: 'Név',
+    email: 'E-mail',
+    subject: 'Tárgy',
+    message: 'Üzenet',
+    send: 'Üzenet küldése',
+    sending: 'Küldés…',
+    error: 'Az üzenetet nem sikerült elküldeni. Kérem, próbálja újra később.',
+    tooMany: 'Túl sok üzenetet küldött. Kérem, próbálja újra később.',
+    back: 'Vissza',
+  },
+  admin: {
+    title: 'Admin',
+    password: 'Jelszó',
+    show: 'Megjelenítés',
+    hide: 'Elrejtés',
+    incorrectPassword: 'Helytelen jelszó.',
+    sessionExpired: 'A munkamenet lejárt. A folytatáshoz jelentkezz be újra.',
+    loggingIn: 'Bejelentkezés…',
+    logIn: 'Bejelentkezés',
+    loadingPoems: 'Betöltés…',
+    list: 'Lista',
+    order: 'Sorrend',
+    addPoem: 'Vers hozzáadása',
+    newPoemTitle: 'Új vers',
+    featured: 'Kiemelt',
+    featurePrompt: 'Kiemeli?',
+    featurePoem: 'Vers kiemelése',
+    unfeaturePoem: 'Kiemelés megszüntetése',
+    deletePoem: 'Vers törlése',
+    deletePoemBody: 'Biztosan törli ezt a verset?',
+    poemPreview: 'Vers előnézete',
+    chooseImage: 'Kép kiválasztása',
+    titleLabel: 'Cím',
+    poemText: 'Vers szövege',
+    pageBreakHint: (marker: string) =>
+      `Írj ${marker} jelet oda, ahonnan a vers új oldalon folytatódjon, ugyanazon a háttéren.`,
+    pageBreakHintCustomSlides: 'Egyéni diák esetén minden lenti dia már külön oldal.',
+    pageBreakHintCustomSlidesLinked: (marker: string) =>
+      `A lenti diák a szövegben lévő ${marker} jeleket követik — ha itt szerkeszted, azonnal frissülnek.`,
+    customSlides: 'Egyéni diák',
+    original: 'Eredeti',
+    save: 'Mentés',
+    saving: 'Mentés…',
+    feature: 'Kiemelés',
+    unfeature: 'Kiemelés megszüntetése',
+    saved: 'Mentve',
+    errorSaving: 'Hiba a mentéskor',
+    addSlide: '+ Dia hozzáadása',
+    saveChanges: 'Menti a változásokat?',
+    saveChangesBody: 'Ez véglegesíti a vershez tartozó összes módosítást.',
+    cancel: 'Mégse',
+    restoreOriginal: 'Visszaállítja az eredetit?',
+    restoreOriginalBody:
+      'A vers visszaáll az automatikusan tördelt elrendezésre. Az egyéni diák elvesznek.',
+    restore: 'Visszaállítás',
+    deleteSlide: 'Dia törlése',
+    deleteSlideBody: 'Biztosan törli ezt a diát?',
+    delete: 'Törlés',
+  },
+};

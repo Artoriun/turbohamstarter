@@ -1,0 +1,41 @@
+{
+  "name": "gedichtenv2-art",
+  "private": true,
+  "description": "Bilingual (Hungarian/English) poetry portfolio: React, TypeScript, Vite and Motion in a TurboRepo monorepo, with an Express + Firestore admin portal. Swipeable full-screen poem reader, auto-advancing carousel, working contact form, WCAG AA contrast, and CI that gates every deploy on Playwright layout tests.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "check:budgets": "node scripts/check-budgets.mjs",
+    "check:lighthouse": "node scripts/check-lighthouse.mjs",
+    "prerender": "node scripts/prerender.mjs",
+    "hash-password": "node scripts/hash-password.mjs",
+    "test:api": "node --import tsx --test \"packages/api/src/**/*.test.ts\"",
+    "test:unit": "node --import tsx --test \"packages/web/src/**/*.test.ts\" \"packages/shared/src/**/*.test.ts\"",
+    "test": "npm run test:api && npm run test:unit",
+    "build-icons": "node scripts/build-icons.mjs",
+    "backup-poems": "node scripts/backup-poems.mjs",
+    "test:e2e:dist": "E2E_TARGET=dist playwright test e2e/dist.spec.ts --project=desktop",
+    "check:parity": "node scripts/check-parity.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@biomejs/biome": "2.5.5",
+    "@playwright/test": "^1.62.0",
+    "lighthouse": "^12.8.2",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": ">=22.18"
+  }
+}

@@ -1,0 +1,60 @@
+# Render Blueprint for the API — mirrors the service that was configured by hand in the
+# dashboard, so the config lives in git rather than only in a web UI.
+#
+# Node version matters here and is not incidental. The API imports POEMS from
+# @gedichtenv2/shared, which ships raw TypeScript (main: src/index.ts), so the compiled
+# dist/index.js requires a runtime that strips types on load — Node 22.18+ does this
+# natively. On Node 20 the same command dies with `Unexpected token 'export'` pointing at
+# packages/shared, with nothing to indicate the real cause. packages/api declares
+# engines.node accordingly.
+services:
+  - type: web
+    name: kov-cs-poetry
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: .
+    buildCommand: npm install && cd packages/api && npm run build
+    startCommand: node packages/api/dist/index.js
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      # Render injects PORT itself; the app already reads it.
+      # Secrets stay dashboard-managed — sync: false means "required, value not in git".
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: FIREBASE_STORAGE_BUCKET
+        sync: false
+      # Contact form. Resend is used in preference to SMTP because free instances cannot
+      # send on ports 25, 465 or 587 — outbound packets are dropped, which surfaces as
+      # ETIMEDOUT at the connection stage. Resend goes over HTTPS on 443 instead.
+      - key: RESEND_API_KEY
+        sync: false
+      # Optional; defaults to onboarding@resend.dev, which needs no domain verification.
+      - key: RESEND_FROM
+        sync: false
+      # SMTP is the fallback, used only when RESEND_API_KEY is unset. Works locally and on
+      # paid plans; will time out on free.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      # Defaults to pjcr.dekeijzer@gmail.com if unset.
+      - key: CONTACT_TO
+        sync: false

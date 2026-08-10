@@ -1,0 +1,248 @@
+name: CI
+
+# Validates every push and pull request, and publishes only if those checks pass.
+#
+# Deploying used to be a separate workflow on the same `push: main` trigger, so the two
+# ran concurrently and the shorter one usually won — a commit with failing tests shipped
+# to production regardless, and the checks only told you afterwards. Keeping the deploy in
+# the same workflow behind `needs:` makes that ordering structural rather than a policy.
+on:
+  push:
+    branches: ['main']
+  pull_request:
+  # Manual rebuild — the quickest way to push an admin-portal edit out to crawlers without
+  # waiting for the weekly run.
+  workflow_dispatch:
+  # Prerendered HTML is a snapshot of the API taken at build time, so poems edited in the
+  # admin portal are live for visitors immediately but invisible to crawlers until the next
+  # build. A weekly rebuild keeps that gap bounded without a deploy credential in the app:
+  # search engines recrawl a site this size on the order of days anyway, so a webhook on
+  # every save would add a repo-write token to the attack surface for no practical gain.
+  schedule:
+    - cron: '0 4 * * 1'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Lint and format check
+        run: npm run check
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: API tests
+        run: npm run test:api
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
+
+      # Needs the build above: checks gzipped bundle sizes, and that no poem image URL
+      # skips optimizeUrl() the way the home carousel did.
+      - name: Budgets
+        run: npm run check:budgets
+
+  e2e:
+    name: Layout tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Only Chromium: these are layout assertions against the one engine the site is
+      # actually verified on, not a cross-browser matrix.
+      #
+      # Cached on the resolved version rather than reinstalled every run: the browser
+      # binaries alone are ~300MB, downloaded from Playwright's own CDN and normally fast,
+      # but a cache hit skips that entirely. The OS-level libraries `--with-deps` also
+      # installs live outside this cache path (they're apt packages, not files under
+      # ~/.cache/ms-playwright) and so still run on every job regardless of cache-hit — on a
+      # cache hit `install-deps` covers just those, without re-fetching the browser itself.
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Chromium's OS dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Run layout, touch and accessibility tests
+        run: npm run test:e2e
+
+      # Accessibility, SEO and best-practices against the built, prerendered output.
+      # continue-on-error until it has been seen green on a runner: it is a recent addition
+      # and a gate nobody has watched pass yet should not be able to block a deploy on its
+      # own say-so.
+      - name: Build and prerender for audit
+        run: npm run build && npm run prerender
+
+      # The same suite again, against what Pages will actually serve: prerendered HTML under
+      # the project base path. Reuses the build above rather than adding a job. This is the
+      # only run that can see a hydration mismatch, a missing SPA fallback, or a link that
+      # resolves outside the base — the dev server has none of those things.
+      # Catches a hydration that succeeds and still moves — the prerendered heading being a
+      # different size from the hydrated one. The existing hydration check only sees React
+      # errors, and this class throws none.
+      - name: First paint vs hydrated
+        run: npm run check:parity
+
+      - name: Run the suite against the built output
+        run: npm run test:e2e:dist
+
+      - name: Lighthouse
+        continue-on-error: true
+        run: npm run check:lighthouse
+
+      # Surfaced on the run page so a failure can be read without digging into the raw log
+      - name: Summarise failures
+        if: failure()
+        run: |
+          {
+            echo '### Layout test failures'
+            echo '```'
+            sed -e 's/\x1b\[[0-9;]*m//g' test-results/*/error-context.md 2>/dev/null | head -80 \
+              || echo 'no error context captured'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: [verify, e2e]
+    # Never from a pull request — a PR build must not publish to production.
+    # `schedule` belongs here: without it the weekly run would build and test but skip the
+    # deploy, so the cron would silently do nothing for the one reason it exists.
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - run: npm ci
+
+      # Builds again rather than reusing the verify job's output on purpose: this one needs
+      # VITE_API_URL baked in, and verify builds without secrets. Reusing that artifact
+      # would publish a bundle pointing at an empty API URL.
+      - name: Build All Packages
+        run: npx turbo run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_CF_BEACON_TOKEN: ${{ vars.VITE_CF_BEACON_TOKEN }}
+
+      # Needs a browser: the prerenderer boots the built app and writes each route's DOM to
+      # its own index.html, so Pages serves real HTML at a 200 instead of falling back to
+      # 404.html. Also emits sitemap.xml and robots.txt from the same poem data.
+      #
+      # Cached the same way as the e2e job's install — see the comment there. This job runs
+      # on its own separate runner, so it cannot reuse that job's cache entry directly, but
+      # it writes to and reads from the same keyed cache across runs.
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+
+      - name: Install Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Chromium's OS dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      # Same secret the build uses: the prerenderer reads the live API so poems edited in
+      # the admin portal reach the static HTML, falling back to the bundled poems (loudly)
+      # if Render is unreachable.
+      - name: Prerender routes, sitemap and robots
+        run: npm run prerender
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      # The poems visitors see are Firestore overrides merged over the bundled fallback, and
+      # that fallback drifts as soon as anything is edited in the portal. Kept as an
+      # artifact rather than committed, so the workflow needs no write access to the repo.
+      - name: Back up the live poems
+        run: npm run backup-poems
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      - name: Upload the backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: poems-backup
+          path: backups/
+          retention-days: 90
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Artifacts
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'packages/web/dist'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

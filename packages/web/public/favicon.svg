@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Kovács">
+  <!-- Monogram of the KOVÁCS header logo. Drawn as geometry rather than text so it renders
+       identically without depending on a font being installed. Square corners and the flat
+       #1a1a1a / #fafafa pair match the site's palette; the arm and leg overlap the stem so
+       the join reads as one solid letter at 16px. -->
+  <rect width="64" height="64" fill="#1a1a1a"/>
+  <g fill="#fafafa">
+    <!-- stem -->
+    <rect x="18" y="17" width="7" height="30"/>
+    <!-- upper arm: edges parallel, cut square at the cap line -->
+    <path d="M23 29 L39.5 17 L48 17 L23 36 Z"/>
+    <!-- lower leg: mirror of the arm about the junction -->
+    <path d="M23 35 L39.5 47 L48 47 L23 28 Z"/>
+  </g>
+  <!-- echoes the 1px rule beneath the site header -->
+  <rect x="18" y="52" width="30" height="2" fill="#fafafa" opacity="0.45"/>
+</svg>

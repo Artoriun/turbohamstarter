@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- iOS ignores SVG favicons, so a home-screen shortcut showed a blank tile. Both PNGs
+         are rasterised from favicon.svg by scripts/build-icons.mjs, so the monogram cannot
+         drift between formats. Relative paths in the manifest resolve against it, which
+         keeps them correct under the /kov-cs-poetry/ base. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Every poem image comes from Cloudinary, so this handshake is worth starting before
+         the markup references one. The Google Fonts preconnects are gone with the
+         stylesheet: Esteban is self-hosted and its @font-face rides along in global.css. -->
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+
+    <title>Kovács | KÖLTÉSZET</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

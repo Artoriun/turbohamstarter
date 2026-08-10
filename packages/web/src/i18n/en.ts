@@ -1,0 +1,142 @@
+// English strings. This object also defines the shape every locale must match
+// (see Dict in ./index). Keep keys in sync across en.ts and hu.ts.
+export const en = {
+  meta: {
+    title: 'Kovács | POETRY',
+  },
+  error: {
+    title: 'Something went wrong',
+    body: 'This page could not be displayed. The poems are still there.',
+    retry: 'Try again',
+    home: 'Back to the home page',
+  },
+  home: {
+    heading: 'Poems by Kovács',
+  },
+  notFound: {
+    title: 'Page not found',
+    body: 'This address does not lead anywhere. It may have been mistyped, or the page may have moved.',
+    poems: 'Browse the poems',
+    home: 'Back to the home page',
+  },
+  privacy: {
+    title: 'Privacy',
+    updated: 'Last updated: July 2026',
+    collectTitle: 'What is collected',
+    collectBody:
+      'Only what you type into the contact form: your name, email address, subject and message. Nothing else about you is gathered, and there is no analytics or tracking of any kind on this site.',
+    useTitle: 'What it is used for',
+    useBody:
+      'Your message is emailed to the site owner so it can be read and answered. It is not used for anything else, and never for marketing.',
+    sharingTitle: 'Who else sees it',
+    sharingBody:
+      'The message passes through Resend, the email delivery service, on its way to the owner’s inbox. The site is hosted on GitHub Pages, the contact form is handled by a server on Render, and the images are served by Cloudinary — as with any website, these providers can see the IP address your browser connects from. Your details are not sold or shared with anyone else.',
+    retentionTitle: 'How long it is kept',
+    retentionBody:
+      'The message is not stored in any database — it exists only as an email in the owner’s inbox, kept for as long as it is useful to answer you. To limit automated abuse, the server briefly remembers the IP addresses that have submitted the form, for one hour.',
+    cookiesTitle: 'Cookies',
+    cookiesBody:
+      'None. Your light or dark mode preference is remembered by your own browser and never leaves your device.',
+    rightsTitle: 'Your rights',
+    rightsBody:
+      'You can ask what has been kept about you, request a copy, or ask for it to be deleted. Use the contact form, or reply to any email you have received.',
+  },
+  nav: {
+    home: 'Home',
+    poems: 'Poems',
+    contact: 'Contact',
+    admin: 'Admin',
+    logout: 'Log out',
+  },
+  header: {
+    subtitle: 'POETRY',
+    menu: 'Toggle menu',
+  },
+  footer: {
+    copyright: '© Peter de Keijzer 2026',
+    backToTop: 'Back to top',
+  },
+  carousel: {
+    featured: 'Featured Poems',
+    readMore: 'Read More',
+    prev: 'Previous',
+    next: 'Next',
+  },
+  poems: {
+    heading: 'Poems',
+    index: 'Index',
+    back: '← Poems',
+    more: 'More Poems',
+    loading: 'Loading…',
+    notFound: 'Poem not found.',
+    prevPage: 'Previous page of the poem',
+    nextPage: 'Next page of the poem',
+  },
+  theme: {
+    toDark: 'Switch to dark mode',
+    toLight: 'Switch to light mode',
+  },
+  contact: {
+    title: 'Contact',
+    success: "Thank you for your message! I'll get back to you as soon as possible.",
+    name: 'Name',
+    email: 'Email',
+    subject: 'Subject',
+    message: 'Message',
+    send: 'Send Message',
+    sending: 'Sending…',
+    error: 'Your message could not be sent. Please try again later.',
+    tooMany: 'Too many messages sent. Please try again later.',
+    back: 'Back',
+  },
+  admin: {
+    title: 'Admin',
+    password: 'Password',
+    show: 'Show',
+    hide: 'Hide',
+    incorrectPassword: 'Incorrect password.',
+    sessionExpired: 'Your session has ended. Log in again to continue.',
+    loggingIn: 'Logging in…',
+    logIn: 'Log in',
+    loadingPoems: 'Loading…',
+    list: 'List',
+    order: 'Order',
+    addPoem: 'Add Poem',
+    newPoemTitle: 'New Poem',
+    featured: 'Featured',
+    featurePrompt: 'Feature?',
+    featurePoem: 'Feature poem',
+    unfeaturePoem: 'Unfeature poem',
+    deletePoem: 'Delete poem',
+    deletePoemBody: 'Are you sure you want to delete this poem?',
+    poemPreview: 'Poem preview',
+    chooseImage: 'Choose image',
+    titleLabel: 'Title',
+    poemText: 'Poem text',
+    // Takes the marker rather than spelling it out, so the hint cannot go stale if it changes.
+    pageBreakHint: (marker: string) =>
+      `Type ${marker} to continue on a new page from that point, over the same background.`,
+    pageBreakHintCustomSlides: 'With Custom Slides on, each slide below is already its own page.',
+    pageBreakHintCustomSlidesLinked: (marker: string) =>
+      `The slides below follow the ${marker} marks in this text — edit it and they update.`,
+    customSlides: 'Custom Slides',
+    original: 'Original',
+    save: 'Save',
+    saving: 'Saving…',
+    feature: 'Feature',
+    unfeature: 'Unfeature',
+    saved: 'Saved',
+    errorSaving: 'Error saving',
+    addSlide: '+ Add Slide',
+    saveChanges: 'Save changes?',
+    saveChangesBody: 'This will persist all changes to this poem.',
+    cancel: 'Cancel',
+    restoreOriginal: 'Restore original?',
+    restoreOriginalBody:
+      'The poem will revert to its auto-split layout. Your custom slides will be discarded.',
+    restore: 'Restore',
+    deleteSlide: 'Delete slide',
+    deleteSlideBody: 'Are you sure you want to delete this slide?',
+    delete: 'Delete',
+  },
+};

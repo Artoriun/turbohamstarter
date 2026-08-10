@@ -1,0 +1,2096 @@
+@import "./themes.css";
+
+/* Esteban is self-hosted rather than loaded from Google. As a stylesheet <link> it was a
+   second render-blocking request to a third-party origin, and as an @import here it was
+   worse still — not even discovered until this file had been parsed. Bundled, the
+   @font-face travels inside the stylesheet the page already needs, and the woff2 files
+   are same-origin, which also removes two preconnects.
+
+   Both subsets are required: Hungarian ő (U+0151) and ű (U+0171) live in latin-ext, so
+   shipping latin alone would silently fall back to the system serif for exactly the
+   characters this site is full of. Licensed OFL-1.1 (see OFL.txt alongside the fonts),
+   which permits redistribution. */
+@font-face {
+  font-family: "Esteban";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/esteban-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0,
+    U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Esteban";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/esteban-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+    U+FEFF, U+FFFD;
+}
+
+/* ===== ANIMATION TIMING ===== */
+:root {
+  --page-fade-duration: 500ms;
+  --page-fade-stagger: 80ms;
+  --carousel-fade-duration: 600ms;
+  --nav-fade-duration: 350ms;
+  --nav-fade-stagger: 60ms;
+  --page-fade-out-duration: 400ms;
+  --pulse-duration: 2400ms;
+}
+
+/* ===== RESET & BASE ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--header-height, 72px);
+  background: var(--bg-primary-color);
+}
+
+@keyframes page-load-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Scrim covers the background on load and fades out, revealing the background image.
+   Using a separate element avoids animating body opacity, which interferes with
+   Motion's RAF timing on mobile and collapses stagger animations. */
+@keyframes page-load-scrim {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.page-load-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary-color);
+  z-index: 9998;
+  pointer-events: none;
+  animation: page-load-scrim 400ms ease both;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Parchment backdrop as a fixed layer rather than `background-attachment: fixed`
+   on the body. Both a fixed background and a fixed element with `inset: 0` are
+   sized to the *small* viewport on Android, so once the URL bar collapses they
+   fall ~77px short and expose the flat fallback colour (#1a1a1a — identical to
+   --footer-bg) as a strip along the bottom. 100lvh is the large viewport (browser
+   chrome retracted), i.e. the tallest the viewport ever gets, so it always covers;
+   the overhang is simply off-screen while the URL bar is showing. */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100lvh;
+  z-index: -1;
+  background: var(--bg-primary);
+  background-size: cover;
+  background-position: center;
+  pointer-events: none;
+}
+
+a {
+  color: var(--text-light);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--text-hover);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+ul {
+  list-style: none;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 400;
+  color: var(--text-primary);
+}
+
+/* ===== SITE WRAPPER ===== */
+.site {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+}
+
+/* ===== HEADER ===== */
+.site-header {
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  animation: page-load-fade 350ms ease 400ms both;
+}
+
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 18px 24px;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  margin-right: 10px;
+}
+
+.logo:hover {
+  color: var(--text-hover);
+}
+
+.subtitle {
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+/* ===== NAVIGATION ===== */
+.main-nav {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.main-nav > ul {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+.main-nav a {
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  position: relative;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+  color: var(--text-hover);
+}
+
+.main-nav a.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--text-hover);
+}
+
+/* ===== DROPDOWN ===== */
+/* ===== LOGIN BUTTON ===== */
+.header-login-btn {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--control-radius);
+  padding: 6px 14px;
+  white-space: nowrap;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+  margin-left: auto;
+}
+
+.header-login-btn:hover {
+  color: var(--text-hover);
+  border-color: var(--text-hover);
+}
+
+.nav-login-mobile {
+  display: none;
+}
+
+.nav-logout-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 6px 0;
+}
+
+.nav-logout-btn:hover {
+  color: var(--text-hover);
+}
+
+/* ===== HAMBURGER ===== */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 12px;
+  z-index: 1001;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+}
+
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text-light);
+  transition: 0.3s ease;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(4px, 4px);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(4px, -4px);
+}
+
+/* ===== PAGE ===== */
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+/* ===== CAROUSEL SECTION ===== */
+.carousel-section {
+  padding: 0;
+  max-width: none;
+  margin: 0;
+}
+
+/* ===== SLICK OVERRIDES ===== */
+.carousel-nav-btn,
+.carousel-read-more-btn {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.carousel-loaded .carousel-nav-btn,
+.carousel-loaded .carousel-read-more-btn {
+  opacity: 1;
+}
+
+.carousel-section-label {
+  -webkit-mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 0% 100%;
+  mask-size: 0% 100%;
+}
+
+/* Label animates once when the first image loads (.image-ready set once, never removed) */
+.image-ready .carousel-section-label {
+  animation: detail-line-reveal 1s ease 0s both;
+}
+
+.carousel-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.6s ease;
+}
+
+.carousel-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.carousel-nav-prev {
+  left: 16px;
+}
+
+.carousel-nav-next {
+  right: 16px;
+}
+
+.carousel-nav-btn::before {
+  display: none;
+}
+
+.carousel-slide {
+  outline: none;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+.carousel-read-more-btn {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  padding: 10px 28px;
+  border-radius: var(--control-radius);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.6s ease;
+  white-space: nowrap;
+}
+
+.carousel-read-more-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.poem-carousel-wrapper {
+  position: relative;
+  /* Reserve the carousel's height up front so the page doesn't reflow when the
+     slide (and its full-height image) renders in. */
+  min-height: calc(100vh - var(--header-height, 72px));
+  min-height: calc(100svh - var(--header-height, 72px));
+}
+
+/* Inner content is gated (not the whole wrapper) so the loading prompt can overlay
+   the reserved carousel space while the first image loads. */
+.carousel-inner {
+  opacity: 0;
+}
+
+.poem-carousel-wrapper.carousel-loaded.image-ready .carousel-inner {
+  animation: poem-fade-in var(--carousel-fade-duration) ease both;
+}
+
+/* On a prerendered page the slide is already in the markup, so there is nothing to wait for
+   and the reveal above only delays content the browser could paint immediately.
+   It also cost the page its Largest Contentful Paint entirely. Everything the home page
+   paints lives inside .carousel-inner, and Chrome will not accept a zero-opacity element as
+   an LCP candidate: it skips the element when it paints and never reconsiders it. So
+   whenever the image finished decoding before this 600ms fade had lifted, no element on the
+   page ever qualified and Lighthouse reported NO_LCP with a null performance score rather
+   than a low one. On production that was a coin toss, because the CDN is fast enough that
+   the image usually won the race; on a slow local server the fade always finished first,
+   which is why it reproduced only against the deployed site.
+   The fade still runs where it means something — a cold load that really is waiting on the
+   first image, which is every non-prerendered entry to the page. */
+html[data-prerendered] .carousel-inner {
+  opacity: 1;
+}
+
+html[data-prerendered] .poem-carousel-wrapper.carousel-loaded.image-ready .carousel-inner {
+  animation: none;
+}
+
+.carousel-section-label {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.carousel-slide-title {
+  pointer-events: none;
+  position: absolute;
+  top: 56px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  font-size: 22px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 0 16px rgba(0, 0, 0, 0.6);
+}
+
+.carousel-link {
+  display: block;
+}
+
+.carousel-image-container {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-secondary);
+}
+
+.carousel-image-container img {
+  width: 100%;
+  height: calc(100vh - var(--header-height, 72px));
+  height: calc(100svh - var(--header-height, 72px));
+  object-fit: cover;
+  filter: brightness(var(--img-brightness));
+  transition:
+    transform 0.4s ease,
+    filter 0.4s ease;
+}
+
+.carousel-link:hover .carousel-image-container img {
+  transform: scale(1.03);
+}
+
+/* ===== CAROUSEL SLIDE WITH OVERLAY ===== */
+.carousel-image-container:has(.carousel-overlay) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - var(--header-height, 72px));
+  height: calc(100svh - var(--header-height, 72px));
+  /* Reserve the title strip above and the READ MORE button below (32px offset + ~36px
+     tall), so the overlay centres between the two rather than against the viewport
+     bottom — otherwise the padding is one-sided and the text sits too low. */
+  padding-top: 80px;
+  padding-bottom: 72px;
+}
+
+.carousel-image-container:has(.carousel-overlay) img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(var(--img-brightness-overlay));
+  transition:
+    transform 0.4s ease,
+    filter 0.4s ease;
+}
+
+.carousel-overlay {
+  pointer-events: none;
+  position: relative;
+  z-index: 10;
+  color: #fff;
+  text-align: left;
+  padding: 50px 60px;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  font-size: clamp(20px, 3.5vmin, 48px);
+  line-height: 1.4;
+  /* The prev/next buttons are 40px wide at left/right:16px, so they own the outer 56px on
+     each side. 90% alone let a long-lined poem reach ~20px from the edge and run under the
+     left arrow (measured 15px of overlap at 412px wide). Reserving 2x56px keeps the box
+     clear of both buttons; on wider screens 90% is the smaller value and still wins. */
+  max-width: min(90%, calc(100% - 112px));
+  /* Matches the container's 80px + 72px padding so a long poem can't grow past it */
+  max-height: calc(100svh - var(--header-height, 72px) - 152px);
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Esteban", serif;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 95%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 95%);
+}
+
+.carousel-overlay-line {
+  display: block;
+  -webkit-mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 0% 100%;
+  mask-size: 0% 100%;
+}
+
+/* Reveal animation only starts once the slide image has loaded (.image-ready on the slide).
+   Using .carousel-slide.image-ready so only the active slide animates, not the exiting one.
+   Title (0.5s delay) comes after the label (0.5s animation), overlay lines follow via inline delays. */
+.carousel-slide.image-ready .carousel-overlay-line {
+  animation: detail-line-reveal 1s ease 0.5s both;
+}
+
+/* ===== POEMS LAYOUT ===== */
+.poems-layout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.poems-toc-wrap {
+  position: sticky;
+  top: var(--header-height, 72px);
+  width: 160px;
+  flex-shrink: 0;
+  /* Spans from just below the header down to the viewport bottom. lvh, not dvh:
+     dvh only settles after the URL-bar collapse finishes, so mid-scroll the sidebar
+     is short by the toolbar height and then visibly snaps down on scroll-end. lvh is
+     a constant (the URL-bar-retracted height), so it stays pinned to the bottom. */
+  height: calc(100vh - var(--header-height, 72px));
+  height: calc(100lvh - var(--header-height, 72px));
+  clip-path: inset(0 0 0 -20px);
+}
+
+.poems-toc {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  /* Span the full height when the list is long (safe falls back to top-aligned +
+     scrollable); center vertically when there aren't enough poems to fill it. */
+  justify-content: safe center;
+}
+
+.toc-range-line {
+  position: absolute;
+  left: -16px;
+  width: 1px;
+  background-image: linear-gradient(var(--text-primary), var(--text-primary));
+  background-repeat: no-repeat;
+}
+
+@keyframes toc-line-grow-down {
+  from {
+    background-size: 1px 0%;
+    background-position: top center;
+  }
+  to {
+    background-size: 1px 100%;
+    background-position: top center;
+  }
+}
+@keyframes toc-line-grow-up {
+  from {
+    background-size: 1px 0%;
+    background-position: bottom center;
+  }
+  to {
+    background-size: 1px 100%;
+    background-position: bottom center;
+  }
+}
+@keyframes toc-line-retract-down {
+  from {
+    background-size: 1px 100%;
+    background-position: bottom center;
+  }
+  to {
+    background-size: 1px 0%;
+    background-position: bottom center;
+  }
+}
+@keyframes toc-line-retract-up {
+  from {
+    background-size: 1px 100%;
+    background-position: top center;
+  }
+  to {
+    background-size: 1px 0%;
+    background-position: top center;
+  }
+}
+
+.poems-toc::-webkit-scrollbar {
+  display: none;
+}
+
+.poems-toc ul {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.poems-toc-title {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+}
+
+.poems-toc a {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  transition: color 0.2s ease;
+}
+
+.poems-toc a:hover {
+  color: var(--text-hover);
+}
+
+.poems-toc li.toc-active > a {
+  padding-bottom: 2px;
+  background-image: linear-gradient(var(--text-primary), var(--text-primary));
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0% 1px;
+  animation: toc-underline 0.65s ease forwards;
+}
+
+@keyframes toc-underline {
+  to {
+    background-size: 100% 1px;
+  }
+}
+
+.poems-content {
+  flex: 1;
+  min-width: 0;
+  /* Keep the column at least as tall as the ToC so the footer always sits below it */
+  min-height: calc(100vh - var(--header-height, 72px));
+  min-height: calc(100lvh - var(--header-height, 72px));
+}
+
+@keyframes poem-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes page-fade-to-detail {
+  to {
+    opacity: 0;
+  }
+}
+
+.poems-grid-page.page-fade-out {
+  animation: page-fade-to-detail var(--page-fade-out-duration) ease forwards;
+  pointer-events: none;
+}
+
+/* ===== POEMS GRID ===== */
+/* Heading + TOC stay hidden until the grid's images have loaded (is-revealed),
+   then fade in together with the cards. */
+.poems-heading,
+.poems-toc-wrap {
+  opacity: 0;
+}
+
+.poems-grid-page.is-revealed .poems-heading {
+  animation: poem-fade-in var(--page-fade-duration) ease both;
+}
+
+.poems-grid-page.is-revealed .poems-toc-wrap {
+  animation: poem-fade-in var(--page-fade-duration) ease var(--page-fade-stagger) both;
+}
+
+.poems-heading {
+  text-align: center;
+  font-size: 20px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+/* Tighten the poems page's vertical padding so the ToC hugs the header/footer */
+.poems-grid-page {
+  padding-block: 16px;
+}
+
+.poems-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* Every loading prompt (grid, admin, detail, carousel) centers in the viewport,
+   so they all appear in the same spot regardless of their container. */
+.loading-prompt {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.poem-card-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes border-flow {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+@keyframes border-pulse {
+  0% {
+    opacity: 0;
+  }
+  8%,
+  25% {
+    opacity: 1;
+  }
+  33% {
+    opacity: 0;
+  }
+  41%,
+  58% {
+    opacity: 1;
+  }
+  66% {
+    opacity: 0;
+  }
+  74%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes poem-highlight-scale {
+  0% {
+    transform: scale(1);
+  }
+  8%,
+  25% {
+    transform: scale(1.04);
+  }
+  33% {
+    transform: scale(1);
+  }
+  41%,
+  58% {
+    transform: scale(1.04);
+  }
+  66% {
+    transform: scale(1);
+  }
+  74%,
+  92% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.poem-highlight,
+.poem-highlight-static {
+  position: relative;
+}
+
+.poem-highlight::before,
+.poem-highlight-static::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  z-index: -1;
+  background: linear-gradient(
+    120deg,
+    rgba(30, 80, 180, 0.75) 0%,
+    rgba(100, 149, 237, 1) 35%,
+    rgba(200, 225, 255, 1) 50%,
+    rgba(100, 149, 237, 1) 65%,
+    rgba(30, 80, 180, 0.75) 100%
+  );
+  background-size: 250% 250%;
+  animation: border-flow 5s ease-in-out infinite alternate;
+}
+
+.poem-highlight::before {
+  animation:
+    border-flow 5s ease-in-out infinite alternate,
+    border-pulse var(--pulse-duration) ease forwards;
+}
+
+.poem-highlight img,
+.poem-highlight .poem-overlay {
+  animation: poem-highlight-scale var(--pulse-duration) ease forwards;
+}
+
+.poem-card {
+  display: block;
+  position: relative;
+}
+
+.poem-card-img-wrap {
+  overflow: hidden;
+  /* Matches .admin-grid-card. Only the image is rounded: the highlight is a ::before glow
+     sitting behind .poem-card at inset -3px, and it is deliberately square — rounding that
+     too was tried before and removed. Keeping the radius on this wrapper leaves the two
+     independent, so the sharp outline still reads as an outline. */
+  border-radius: 4px;
+}
+
+.poem-card img {
+  filter: brightness(var(--img-brightness));
+  transition:
+    transform 0.4s ease,
+    filter 0.4s ease;
+}
+
+.poem-card:hover img {
+  transform: scale(1.03);
+}
+
+.poem-card-title {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.card-title {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* ===== POEM CARD WITH OVERLAY ===== */
+.poems-grid .poem-card:has(.poem-overlay) {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  height: auto;
+}
+
+.poems-grid .poem-card:has(.poem-overlay) .poem-card-img-wrap {
+  position: absolute;
+  inset: 0;
+}
+
+.poems-grid .poem-card:has(.poem-overlay) img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(var(--img-brightness-overlay));
+  transition:
+    transform 0.4s ease,
+    filter 0.4s ease;
+}
+
+.poems-grid .poem-card:has(.poem-overlay) .poem-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  /* flex-start, not centre: align-items governs the horizontal axis in a column, so
+     leaving it centred would keep the text block centred whatever text-align says.
+     justify-content still handles the vertical centring. */
+  align-items: flex-start;
+  justify-content: safe center;
+  color: #fff;
+  text-align: left;
+  padding: 30px 20px;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Esteban", serif;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 95%);
+  mask-image: linear-gradient(to bottom, black 60%, transparent 95%);
+}
+
+.poems-grid .poem-card:has(.poem-overlay):hover img {
+  filter: brightness(calc(var(--img-brightness-overlay) - 0.1));
+}
+
+.btn-more {
+  display: block;
+  border-radius: var(--control-radius);
+  margin: 36px auto 0;
+  padding: 16px 48px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-more:hover {
+  background: var(--button-bg-hover);
+  color: var(--button-text-hover);
+}
+
+/* ===== POEM DETAIL ===== */
+.poem-detail {
+  text-align: center;
+  padding: 0;
+  max-width: none;
+  margin: 0;
+  position: relative;
+  /* svh, not dvh: the text is paginated once against this height, so it has to be a
+     constant. dvh grows when the URL bar collapses and would leave that split stale.
+     svh is the smallest the viewport gets, so the lines always fit; the fixed layers
+     below are sized in lvh, so the extra space is still covered by the image. */
+  height: calc(100vh - var(--header-height, 72px));
+  height: calc(100svh - var(--header-height, 72px));
+  overflow: hidden;
+}
+
+/* Custom slides are authored as complete pages and shown verbatim, never paginated to
+   fit. Same footprint as a paginated poem — one viewport tall, so the footer sits just
+   past the fold — except this one is a floor rather than a fixed height, because an
+   authored slide too long for the screen has to grow instead of being cut. A short slide
+   centres in the viewport; the chain stays flex down to the text box, see .detail-slide. */
+.poem-detail.custom-slides {
+  height: auto;
+  min-height: calc(100vh - var(--header-height, 72px));
+  min-height: calc(100svh - var(--header-height, 72px));
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  /* Slides differ in length, so the poem — and the footer under it — changes height
+     between them. JS sets an explicit height per slide (auto has nothing to animate
+     from) and this eases it, matching the 0.45s slide transition. */
+  transition: min-height 0.45s ease;
+}
+
+/* ===== DETAIL PAGE OVERLAY ===== */
+.detail-fixed-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* lvh so the image still covers once the URL bar retracts */
+  height: 100vh;
+  height: 100lvh;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.poem-detail::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* Matches .detail-fixed-bg: a fixed inset:0 box is sized to the small viewport, which
+     left the bottom strip of the image undimmed once the URL bar collapsed. */
+  height: 100vh;
+  height: 100lvh;
+  background: rgba(0, 0, 0, calc(1 - var(--img-brightness-overlay)));
+  z-index: 0;
+  pointer-events: none;
+  animation: detail-fade-in 0.6s ease both;
+}
+
+/* Slick overrides for vertical carousel */
+.poem-detail .detail-image-container {
+  cursor: grab;
+}
+
+.poem-detail.dragging .detail-image-container {
+  cursor: grabbing;
+}
+
+.poem-detail .detail-overlay-line,
+.poem-detail .detail-overlay-line-revealed,
+.poem-detail .detail-title {
+  cursor: default;
+}
+
+.detail-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.detail-scroll-up-btn {
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 1;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.4s ease;
+}
+
+.detail-scroll-up-btn.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.detail-scroll-up-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.detail-title {
+  position: absolute;
+  top: 32px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  font-size: 22px;
+  letter-spacing: 3px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 16px rgba(0, 0, 0, 0.6);
+}
+
+/* The slide wrapper has to carry the height so the container below can fill it */
+.poem-detail .detail-slide {
+  height: 100%;
+}
+
+.poem-detail .detail-image-container:has(.detail-overlay) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Without a height this box is content-sized, so justify-content had nothing to
+     centre within and the text was top-anchored with all the slack falling below it.
+     Filling the slide lets the padding reserve the title above and the scroll-down
+     button below (32px offset + 42px tall), centring the poem between the two. */
+  height: 100%;
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.poem-detail .detail-image-container.has-title:has(.detail-overlay) {
+  padding-top: 96px;
+}
+
+/* The slide fills the height the poem was stretched to, so a short one gives the existing
+   justify-content:center room to centre its text in rather than stacking it at the top,
+   and a long one still grows with its content instead of being clipped. */
+/* 1 0 auto, so it grows to fill the row when the poem is short (giving the centring
+   below something to centre in) but never shrinks below its text when the poem is long —
+   shrinking is what let a tall slide overflow the row instead of scrolling it. */
+.poem-detail.custom-slides .detail-slide {
+  flex: 1 0 auto;
+  height: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* flex rather than height:100%: a percentage height does not resolve against a parent
+   that was itself sized by flex-grow, which left the text box content-sized and the poem
+   stacked at the top of a stretched slide. `safe` centre so an over-long poem falls back
+   to top-aligned instead of overflowing off both ends, where the top would be unreachable. */
+.poem-detail.custom-slides .detail-image-container:has(.detail-overlay) {
+  justify-content: safe center;
+  flex: 1 0 auto;
+  height: auto;
+  min-height: 0;
+}
+
+/* Until pagination has run the slide holds the whole poem: the prerenderer deliberately
+   leaves it unpaginated so a crawler gets every line, and the client renders the same thing
+   for one frame. The container centres its content, so when pagination cut poem-23 from 24
+   lines to 11 the block shrank from 747px to 476px and everything inside it moved — 0.27 of
+   layout shift under Lighthouse's throttling, where the work lands after first paint.
+   Clipping the unpaginated text to the height a page will occupy makes both states the same
+   size, so pagination changes which lines are shown rather than where they sit. The lines
+   beyond the cut stay in the DOM and are still read by crawlers. */
+.poem-detail.is-unpaginated .detail-overlay {
+  max-height: 100%;
+  overflow: hidden;
+}
+
+/* Off-screen measuring copy of the full poem. Must match the real overlay's width so
+   lines wrap identically; visibility:hidden keeps it laid out (and therefore measurable)
+   while absolute positioning keeps it out of the visible flow. */
+.detail-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* Zero-height and clipped: an absolutely positioned box still enlarges the scrollable
+     area of the page, so at full poem length this pushed the document ~176px past the
+     footer and the fixed poem image showed through the gap. .poem-detail used to be
+     overflow:hidden, which masked it; custom slides need overflow:visible. Clipping here
+     contains it instead. The child is still laid out, so it stays measurable. */
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.detail-measure .detail-overlay {
+  margin: 0 auto;
+}
+
+.detail-overlay {
+  position: relative;
+  z-index: 10;
+  color: #fff;
+  text-align: left;
+  padding: 50px 60px;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+  font-size: clamp(20px, 3.5vmin, 48px);
+  line-height: 1.6;
+  /* No width. The box hugs its own longest line and the container centres it, so every
+     poem sits centred with its lines flush left inside. A fixed column instead (tried
+     once, reverted) gives a stable left edge across poems but leaves short-lined poems
+     stranded against the left with a wide gap on the right — far worse to look at than
+     the left edge shifting as you page. */
+  max-width: 85%;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Esteban", serif;
+}
+
+@keyframes detail-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hold the background and text hidden until the image has loaded, then reveal
+   together — otherwise the full-screen image pops in after the text on a cold cache. */
+.detail-img-anim {
+  opacity: 0;
+}
+
+/* .is-painted is added when the <img> itself finishes decoding. Without it the fade ran
+   against an image that had no pixels yet on a prerendered page, where the reveal gate is
+   already open at first paint, and the background snapped in when they arrived. */
+.poem-detail.image-ready .detail-img-anim.is-painted {
+  animation: detail-fade-in 0.6s ease both;
+}
+
+/* Nothing adds .is-painted without the runtime, so keep the prerendered background visible
+   for a scriptless client rather than leaving it transparent. */
+@media (scripting: none) {
+  .detail-img-anim {
+    opacity: 1;
+  }
+}
+
+.poem-detail:not(.image-ready) .detail-overlay-line {
+  animation: none;
+  opacity: 0;
+}
+
+.detail-overlay-line {
+  display: block;
+  width: fit-content;
+  /* margin-right auto only: the line hugs its text and sits at the left edge. With
+     `margin: 0 auto` each line was centred individually, which text-align cannot undo. */
+  margin: 0 auto 0 0;
+  /* No opacity:0 here, deliberately. The mask below already hides the line completely at
+     0% width, so an opacity of zero only duplicated it — and Chrome refuses to treat a
+     zero-opacity element as a Largest Contentful Paint candidate. With every line of the
+     poem starting transparent, nothing on the page qualified and Lighthouse reported
+     NO_LCP, which nulls the performance score outright. The wipe is unchanged. */
+  -webkit-mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 0% 100%;
+  mask-size: 0% 100%;
+  animation: detail-line-reveal 1s ease both;
+}
+
+@keyframes detail-line-reveal {
+  from {
+    -webkit-mask-size: 0% 100%;
+    mask-size: 0% 100%;
+  }
+  to {
+    -webkit-mask-size: 130% 100%;
+    mask-size: 130% 100%;
+  }
+}
+
+/* The title carries .detail-overlay-line too, for its reveal animation, so it inherited
+   the left-hugging fit-content box and slid to the far left. Only the poem body should be
+   left-aligned — put the title back. Scoped selector so it beats the equal-specificity
+   .detail-overlay-line rule regardless of order. */
+.poem-detail .detail-title {
+  width: auto;
+  margin: 0;
+  text-align: center;
+}
+
+.detail-overlay-line-revealed {
+  display: block;
+  width: fit-content;
+  /* margin-right auto only: the line hugs its text and sits at the left edge. With
+     `margin: 0 auto` each line was centred individually, which text-align cannot undo. */
+  margin: 0 auto 0 0;
+  opacity: 1;
+  -webkit-mask-size: 130% 100%;
+  mask-size: 130% 100%;
+  -webkit-mask-image: linear-gradient(to right, black 75%, transparent 100%);
+  mask-image: linear-gradient(to right, black 75%, transparent 100%);
+}
+
+.detail-scroll-down-btn {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 1;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.4s ease;
+}
+
+.detail-scroll-down-btn.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.detail-scroll-down-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.detail-back-btn {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 26px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--control-radius);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 1;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+  animation: detail-fade-in 0.6s ease backwards;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+.detail-back-btn.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+  animation-name: none;
+}
+
+.detail-back-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* ===== CONTACT ===== */
+@keyframes contact-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contact-page h1 {
+  animation: contact-fade-up var(--page-fade-duration) ease both;
+}
+
+.contact-form > *:nth-child(1) {
+  animation: contact-fade-up var(--page-fade-duration) ease both;
+  animation-delay: calc(var(--page-fade-stagger) * 1);
+}
+.contact-form > *:nth-child(2) {
+  animation: contact-fade-up var(--page-fade-duration) ease both;
+  animation-delay: calc(var(--page-fade-stagger) * 2);
+}
+.contact-form > *:nth-child(3) {
+  animation: contact-fade-up var(--page-fade-duration) ease both;
+  animation-delay: calc(var(--page-fade-stagger) * 3);
+}
+.contact-form > *:nth-child(4) {
+  animation: contact-fade-up var(--page-fade-duration) ease both;
+  animation-delay: calc(var(--page-fade-stagger) * 4);
+}
+.contact-form > *:nth-child(5) {
+  animation: contact-fade-up var(--page-fade-duration) ease both;
+  animation-delay: calc(var(--page-fade-stagger) * 5);
+}
+
+.contact-page h1 {
+  text-align: center;
+  font-size: 20px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+  color: var(--text-primary);
+}
+
+.contact-form {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group textarea {
+  border-radius: var(--control-radius);
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--input-border-focus);
+}
+
+/* Subject and message keep spellcheck — it is useful there — but a flagged word is painted
+   in the browser's own colour, which reads as black against the dark theme. These highlight
+   pseudo-elements keep the text colour and leave only the underline to mark the word. */
+.form-group input::spelling-error,
+.form-group textarea::spelling-error,
+.form-group input::grammar-error,
+.form-group textarea::grammar-error {
+  color: var(--text-primary);
+}
+
+/* Chrome paints its own near-white background on autofilled fields and ignores
+   background-color overrides, so in dark mode a remembered email turned the field white.
+   A large inset shadow is the one thing that does cover it; text-fill-color and caret-color
+   have to be set alongside or the text is dark-on-dark. */
+.form-group input:-webkit-autofill,
+.form-group input:-webkit-autofill:hover,
+.form-group input:-webkit-autofill:focus,
+.form-group input:-webkit-autofill:active,
+.form-group textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  -webkit-text-fill-color: var(--text-primary);
+  caret-color: var(--text-primary);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.btn-submit {
+  display: block;
+  border-radius: var(--control-radius);
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid var(--border-color);
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+  margin-top: 8px;
+}
+
+.btn-submit:hover {
+  background: var(--button-bg-hover);
+  color: var(--button-text-hover);
+}
+
+/* Centres the confirmation between header and footer. flex rather than a min-height so the
+   floor is "whatever is left of the viewport" instead of a figure that guesses at the
+   header and footer heights. */
+.main-content:has(.contact-page.is-success) {
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-page.is-success {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-success {
+  text-align: center;
+  color: var(--text-light);
+  /* Esteban, matching the poem text rather than the UI sans-serif */
+  font-family: "Esteban", serif;
+  font-size: 19px;
+  line-height: 1.8;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.contact-return-btn {
+  margin-top: 36px;
+  width: auto;
+  min-width: 220px;
+}
+
+.contact-error {
+  color: #c0392b;
+  /* Esteban like the success message; only the colour distinguishes it */
+  font-family: "Esteban", serif;
+  font-size: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+html.dark-mode .contact-error {
+  color: #e77d6a;
+}
+
+/* Honeypot. display:none would be the obvious choice, but some bots skip hidden inputs —
+   off-screen still looks like a real field to them while being invisible and unreachable
+   by keyboard or screen reader. */
+.contact-hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ===== FOOTER ===== */
+
+.site-footer {
+  background: var(--footer-bg);
+  border-top: 1px solid var(--border-color);
+  padding: 24px;
+  text-align: center;
+  opacity: 1;
+  transition: opacity 0.4s ease;
+  /* Lifted above the poem detail's dimming scrim. That scrim is fixed and covers the whole
+     viewport at z-index 0, and an unpositioned footer paints below any positioned element,
+     so it was being tinted along with the image — the footer and its text came out at 68%
+     brightness on poem pages only, which also cost the link its contrast. */
+  position: relative;
+  z-index: 1;
+}
+
+/* Hide the footer while a loading prompt is on screen (admin + poems grid),
+   then fade it in once the content is ready. */
+body:has(.loading-prompt) .site-footer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* Copyright uses the poem-overlay serif to match the site's poetry styling */
+.footer-inner p {
+  font-family: "Esteban", serif;
+}
+
+.footer-copyright-link {
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.footer-copyright-link:hover {
+  color: var(--text-secondary);
+}
+
+.back-to-top {
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.back-to-top:hover {
+  color: var(--text-secondary);
+}
+
+/* ===== THEME TOGGLE ===== */
+.theme-toggle {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  width: 32px;
+}
+
+.theme-toggle {
+  filter: brightness(0);
+}
+
+html.dark-mode .theme-toggle {
+  filter: brightness(0) invert(1);
+}
+
+html.dark-mode .header-login-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+html.dark-mode .header-login-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .header-inner {
+    flex-wrap: nowrap;
+  }
+
+  .logo {
+    margin-right: auto;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .main-nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    transform: none;
+    width: 100%;
+    background: var(--dropdown-bg);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 0;
+    order: unset;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    padding: 0;
+    transition:
+      max-height 0.35s ease,
+      opacity 0.25s ease,
+      padding 0.35s ease;
+  }
+
+  .main-nav.open {
+    max-height: 300px;
+    opacity: 1;
+    padding: 16px 0;
+  }
+
+  .main-nav.open > ul > li {
+    animation: poem-fade-in var(--nav-fade-duration) ease both;
+  }
+  .main-nav.open > ul > li:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  .main-nav.open > ul > li:nth-child(2) {
+    animation-delay: var(--nav-fade-stagger);
+  }
+  .main-nav.open > ul > li:nth-child(3) {
+    animation-delay: calc(var(--nav-fade-stagger) * 2);
+  }
+  .main-nav.open > ul > li:nth-child(4) {
+    animation-delay: calc(var(--nav-fade-stagger) * 3);
+  }
+
+  .header-login-btn {
+    display: none;
+  }
+
+  .nav-login-mobile {
+    display: block;
+  }
+
+  .hamburger {
+    display: flex;
+    margin-left: 12px;
+  }
+
+  .theme-toggle {
+    margin-left: 12px;
+    order: unset;
+  }
+
+  .main-nav > ul {
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+  }
+
+  .main-nav > ul > li > a,
+  .main-nav > ul > li > .nav-logout-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .poems-toc-wrap {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .poems-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+
+  .theme-toggle {
+    font-size: 18px;
+    padding: 2px 4px;
+    margin-left: 8px;
+  }
+
+  .carousel-image-container:has(.carousel-overlay) {
+    height: calc(100vh - var(--header-height, 72px));
+    height: calc(100svh - var(--header-height, 72px));
+  }
+
+  .carousel-overlay {
+    padding: 30px 20px;
+  }
+
+  .detail-overlay {
+    padding: 30px 20px;
+  }
+}
+
+@media (max-height: 500px) {
+  /* Landscape only. Here the toolbar is a large share of the viewport, so sizing the
+     carousel in svh (the URL-bar-shown height) left a visible gap between the image and
+     the footer once the bar retracted. dvh tracks the live viewport so the two stay
+     flush, and .site has to use the same unit or .main-content — being flex:1 — absorbs
+     the difference and the gap reappears above the footer.
+     The trade-off is that the carousel resizes as the bar hides and shows; the eased
+     height turns that into the image settling rather than a jump. Portrait keeps svh,
+     where the toolbar is proportionally smaller and a static height is preferable. */
+  .site {
+    min-height: 100dvh;
+  }
+
+  .poem-carousel-wrapper {
+    min-height: calc(100dvh - var(--header-height, 72px));
+    transition: min-height 0.25s ease;
+  }
+
+  .carousel-section-label {
+    top: 8px;
+  }
+
+  .carousel-slide-title {
+    top: 28px;
+    font-size: 16px;
+  }
+
+  .carousel-image-container:has(.carousel-overlay) {
+    align-items: flex-start;
+    padding-top: 0;
+    height: calc(100dvh - var(--header-height, 72px));
+    transition: height 0.25s ease;
+  }
+
+  .carousel-overlay {
+    padding-top: 56px;
+    padding-bottom: 12px;
+    max-height: calc(100dvh - var(--header-height, 72px) - 16px);
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 78%);
+    mask-image: linear-gradient(to bottom, black 50%, transparent 78%);
+  }
+
+  .site-header {
+    position: relative;
+  }
+
+  /* Header scrolls away in landscape, so pin the ToC near the top and span the
+     full height; the content column's matching min-height keeps the footer below. */
+  .poems-toc-wrap {
+    top: 16px;
+    height: calc(100vh - 16px);
+    height: calc(100lvh - 16px);
+  }
+
+  .poems-content {
+    min-height: calc(100vh - 16px);
+    min-height: calc(100lvh - 16px);
+  }
+
+  /* Very little vertical room in landscape — tighten the page/heading so the ToC
+     sits close to the header and footer. */
+  .poems-grid-page {
+    padding-block: 8px;
+  }
+
+  .poems-heading {
+    margin-bottom: 8px;
+  }
+
+  .poem-detail {
+    height: calc(2 * (100svh - var(--header-height, 72px)));
+  }
+
+  /* One screen minimum rather than the two a paginated slide gets: the slide already
+     grows to fit its own text, so reserving a second screen would only add dead space
+     between the last line and the button. */
+  .poem-detail.custom-slides {
+    height: auto;
+  }
+
+  /* A measured poem needs the two screens above only while it is being measured — that
+     height is what decides how many lines fit a page. Once the pages exist the reserve has
+     done its job, and keeping it left whatever the page did not fill sitting between the
+     last line and the button: 240px on a Pixel 8a, because the even-spread rule puts 9 of
+     poem-30's 17 lines on a page that had room for 11. Releasing it here rather than in the
+     rule above is deliberate — before pagination the box must stay a fixed, known height or
+     it would size to its content while its content is being sized to it.
+
+     --slide-h is the tallest page, published by the reader once it has measured. Every page
+     is held at that height so the box does not resize as slides swap: the nav buttons are
+     positioned against this box, and the one pinned to its bottom jumped the moment the
+     incoming slide mounted, after the transition had already finished. */
+  .poem-detail.is-paginated {
+    height: auto;
+    min-height: max(var(--slide-h, 0px), calc(100svh - var(--header-height, 72px)));
+  }
+
+  .poem-detail.custom-slides .detail-image-container:has(.detail-overlay) {
+    min-height: 0;
+  }
+
+  .detail-title {
+    top: 24px;
+    font-size: 16px;
+  }
+
+  .detail-scroll-up-btn {
+    top: 24px;
+  }
+
+  .poem-detail .detail-image-container:has(.detail-overlay) {
+    /* .poem-detail is two viewport-heights tall in landscape, so filling it would
+       centre the poem across the fold. Stay content-sized and top-anchored here. */
+    height: auto;
+    padding-top: 72px;
+    padding-bottom: 100px;
+  }
+
+  .poem-detail .detail-image-container.has-title:has(.detail-overlay) {
+    padding-top: 72px;
+  }
+
+  .detail-overlay {
+    padding: 8px 16px;
+  }
+}
+
+/* Buttons that are links, on the error and not-found pages. .btn-submit is block-level and
+   full width because it was written for the contact form; these sit in a centred column and
+   should size to their own text instead. text-decoration is reset because the base `a` rule
+   does not apply it, but a browser default would. */
+.btn-link {
+  width: auto;
+  min-width: 220px;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 0;
+  /* An <a> inherits the body's line-height and a <button> does not, so without this the
+     two sit 5px apart in height — visible on the error page, where a retry button and a
+     link home are stacked together. */
+  line-height: normal;
+}
+
+/* ===== ERROR BOUNDARY FALLBACK ===== */
+/* Deliberately plain: it has to render even when whatever broke is layout-related. */
+.error-page {
+  text-align: center;
+}
+
+.error-body {
+  color: var(--text-light);
+  margin: 12px 0 28px;
+}
+
+.error-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ===== LEGAL PAGES ===== */
+.legal-page {
+  max-width: 720px;
+}
+
+.legal-page h2 {
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 28px 0 8px;
+}
+
+.legal-page p {
+  color: var(--text-light);
+  line-height: 1.8;
+}
+
+.legal-updated {
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* ===== REDUCED MOTION ===== */
+/* WCAG 2.3.3. This site is built on movement — mask wipes, staggered reveals, sliding
+   carousels — which is exactly the kind of thing that causes trouble for people with
+   vestibular disorders.
+
+   Durations are collapsed to a hair rather than set to `none`. Many of these animations
+   begin at opacity 0 and rely on their fill mode to end visible; `animation: none` would
+   strip that and leave the poems invisible. A 0.01ms animation still runs, still fires its
+   end events, and still lands on the final keyframe — it simply does so imperceptibly.
+   Motion's own animations are handled by MotionConfig reducedMotion="user" in main.tsx. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Available to screen readers and crawlers, invisible on screen. The clip-path/1px-box
+   combination rather than `display: none` or `visibility: hidden`, both of which remove the
+   element from the accessibility tree — which would defeat the point entirely. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

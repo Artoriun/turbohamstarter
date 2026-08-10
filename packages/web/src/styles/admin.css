@@ -1,0 +1,960 @@
+:root {
+  --admin-card-bg: rgba(245, 245, 245, 0.95);
+}
+
+html.dark-mode {
+  --admin-card-bg: rgba(34, 34, 34, 0.95);
+}
+
+.admin-page {
+  min-height: 100vh;
+  padding: 0;
+  font-family: var(--font-body, sans-serif);
+}
+
+/* ── Login ── */
+
+.admin-login-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.admin-login {
+  width: 100%;
+  max-width: 360px;
+  padding: 40px;
+  background: var(--card-bg, var(--bg-secondary));
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-login-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-login h1 {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.admin-login-error {
+  font-size: 13px;
+  color: #e05a5a;
+}
+
+/* Not styled as an error: the session ending is normal, and the admin has done nothing
+   wrong. It just explains why the login form is here.
+
+   A named colour rather than `opacity`, which would have dimmed the text by an amount no
+   contrast check can account for. --text-secondary on this card (--card-bg is never
+   defined, so --bg-secondary always applies) is 6.8:1 in light and 5.6:1 in dark. */
+.admin-login-notice {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ── Dashboard header ── */
+
+.admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-header h1 {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* ── Poem grid ── */
+
+.admin-poem-list {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Poem card ── */
+
+.admin-card-wrapper {
+  position: relative;
+}
+
+.admin-card-wrapper.drop-target::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--text-primary);
+  pointer-events: none;
+}
+
+.admin-poem-card {
+  border: 1px solid var(--border-color);
+  background: var(--admin-card-bg);
+  /* Same 4px as the poem and admin grid cards — cards are rounder than controls. */
+  border-radius: 4px;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .admin-poem-card {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-file-label {
+    width: 140px;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+}
+
+.admin-poem-card {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.admin-add-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-add-label {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.admin-add-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-add-btn:hover {
+  background: var(--hover-bg, rgba(0, 0, 0, 0.06));
+  border-color: var(--text-secondary);
+}
+
+.admin-add-btn:focus {
+  outline: none;
+}
+
+html.dark-mode .admin-add-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+html.dark-mode .admin-add-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.admin-delete-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  z-index: 10;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-delete-btn:hover {
+  background: #c0392b;
+  border-color: #c0392b;
+  color: #fff;
+}
+
+html.dark-mode .admin-delete-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+html.dark-mode .admin-delete-btn:hover {
+  background: rgba(192, 57, 43, 0.7);
+  border-color: rgba(192, 57, 43, 0.9);
+}
+
+.admin-featured-label {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: cornflowerblue;
+  pointer-events: none;
+}
+
+.admin-poem-card:active {
+  cursor: grabbing;
+}
+
+.admin-poem-card input,
+.admin-poem-card textarea {
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.admin-poem-card button,
+.admin-poem-card label {
+  cursor: pointer;
+}
+
+.admin-poem-card img {
+  cursor: default;
+}
+
+.admin-poem-card.dragging {
+  opacity: 0.4;
+}
+
+.admin-poem-image-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-poem-thumb {
+  width: 140px;
+  height: 100px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Positioning context for the overlay preview; sized by the thumb inside it. */
+.admin-poem-thumb-wrap {
+  position: relative;
+  width: 140px;
+  height: 100px;
+  /* An image container, so it follows the cards at 4px rather than the controls. */
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Mirrors .admin-grid-card-overlay. Smaller type because this box is 100px tall against
+   the grid card's ~150px, so 11px would show only five or six lines before the fade. */
+.admin-poem-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: safe center;
+  color: #fff;
+  text-align: left;
+  padding: 8px 8px;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.85);
+  font-size: 8px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Esteban", serif;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 90%);
+  mask-image: linear-gradient(to bottom, black 55%, transparent 90%);
+  pointer-events: none;
+}
+
+.admin-poem-title {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.admin-poem-id {
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.admin-poem-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-field-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* --text-secondary rather than a dimmed --text-primary: this is the one place the page-break
+   marker is documented, so it has to stay legible. 6.8:1 light, 5.6:1 dark. */
+.admin-field-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 6px 0 0;
+}
+
+.admin-overlay-textarea,
+.admin-title-input {
+  border-radius: var(--control-radius);
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.6;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.admin-overlay-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.admin-overlay-textarea:focus,
+.admin-title-input:focus {
+  border-color: var(--text-secondary);
+}
+
+/* ── Image upload ── */
+
+.admin-image-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-image-preview {
+  width: 100px;
+  height: 70px;
+  object-fit: cover;
+  border: 1px solid var(--border-color);
+}
+
+.admin-file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 20px;
+  /* A label wrapping a hidden file input, but it looks and behaves like a button. */
+  border-radius: var(--control-radius);
+  border: 1px solid var(--text-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.admin-file-label:hover {
+  background: var(--hover-bg, rgba(0, 0, 0, 0.04));
+  border-color: var(--text-secondary);
+}
+
+.admin-file-input {
+  display: none;
+}
+
+.admin-file-name {
+  font-size: 12px;
+  color: var(--text-secondary);
+  align-self: center;
+}
+
+/* ── Actions ── */
+
+.admin-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-btn {
+  padding: 9px 20px;
+  border-radius: var(--control-radius);
+  font-family: inherit;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.admin-btn:hover:not(:disabled) {
+  background: var(--hover-bg, rgba(0, 0, 0, 0.04));
+  border-color: var(--text-secondary);
+}
+
+.admin-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.admin-btn-featured {
+  border-color: cornflowerblue;
+  color: cornflowerblue;
+}
+
+.admin-btn-custom-slides-active {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.admin-btn-primary {
+  background: rgba(44, 44, 44, 0.85);
+  border: 1px solid rgba(44, 44, 44, 0.5);
+  color: #fafafa;
+  letter-spacing: 0.15em;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 1);
+  border-color: rgba(0, 0, 0, 0.8);
+}
+
+html.dark-mode .admin-btn-primary {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #fff;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+html.dark-mode .admin-btn-primary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+.admin-save-status {
+  font-size: 12px;
+  align-self: center;
+  color: var(--text-secondary);
+}
+
+/* ── Shared inputs ── */
+
+.admin-password-wrap {
+  position: relative;
+}
+
+.admin-password-wrap .admin-input {
+  border-radius: var(--control-radius);
+  padding-right: 60px;
+}
+
+.admin-password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0;
+  /* No `opacity` here. It used to be 0.7, which dimmed --text-secondary to an effective
+     #767676 on the input's #252525 — 3.37:1, under AA for small text, and invisible to any
+     review that looks at the token rather than the rendered pixel. Undimmed it measures
+     5.4:1 in dark and 7.5:1 in light. Hover changes colour instead, so the affordance
+     survives without touching contrast. */
+  transition: color 0.15s ease;
+}
+
+.admin-password-toggle:hover,
+.admin-password-toggle:focus-visible {
+  color: var(--text-hover);
+}
+
+.admin-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.admin-input:focus {
+  border-color: var(--input-border-focus);
+}
+
+/* Chrome/mobile autofill paints its own light background over password fields;
+   the inset box-shadow masks it and text-fill-color keeps the text readable */
+.admin-input:-webkit-autofill,
+.admin-input:-webkit-autofill:hover,
+.admin-input:-webkit-autofill:focus,
+.admin-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--text-primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  box-shadow: 0 0 0 1000px var(--input-bg) inset;
+  caret-color: var(--text-primary);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* ── Custom slides ── */
+
+.admin-custom-slides {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-slide-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.admin-slide-num {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  min-width: 16px;
+  padding-top: 12px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.admin-slide-textarea {
+  flex: 1;
+  min-height: 80px;
+}
+
+.admin-slide-remove-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 10px;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-slide-remove-btn:hover {
+  background: var(--hover-bg, rgba(0, 0, 0, 0.06));
+  border-color: var(--text-secondary);
+}
+
+.admin-slide-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ── Delete confirmation modal ── */
+
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-modal {
+  background: var(--card-bg, var(--bg-secondary));
+  border: 1px solid var(--border-color);
+  padding: 36px 40px;
+  max-width: 360px;
+  width: 90%;
+}
+
+.admin-modal-title {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+}
+
+.admin-modal-body {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 28px;
+  line-height: 1.6;
+}
+
+.admin-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.admin-btn-danger {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.admin-btn-danger:hover {
+  background: rgba(192, 57, 43, 0.08);
+  border-color: #c0392b;
+}
+
+/* ── Mode toggle ── */
+
+.admin-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-mode-toggle {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: var(--control-radius);
+  overflow: hidden;
+}
+
+.admin-mode-btn {
+  padding: 7px 18px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.admin-mode-btn.active {
+  background: var(--text-primary);
+  color: var(--header-bg, #fff);
+}
+
+/* ── Admin grid view ── */
+
+.admin-grid-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+@keyframes admin-grid-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.admin-grid-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: grab;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  animation: admin-grid-item-in 0.2s ease both;
+  animation-delay: min(calc(var(--gi, 0) * 0.05s), 0.35s);
+}
+
+.admin-grid-item:active {
+  cursor: grabbing;
+}
+
+.admin-grid-item.is-dragging {
+  opacity: 0.35;
+}
+
+.admin-grid-item.drop-target .admin-grid-card {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+.admin-grid-card {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 4px;
+}
+
+.admin-grid-featured-label {
+  position: absolute;
+  top: 3px;
+  left: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: cornflowerblue;
+  text-shadow:
+    0 1px 4px rgba(0, 0, 0, 1),
+    0 0 3px rgba(0, 0, 0, 1);
+  cursor: pointer;
+}
+
+.admin-grid-featured-label::before {
+  content: "";
+  position: absolute;
+  inset: -3px -7px;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.22);
+  filter: blur(7px);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.admin-grid-unfeature-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid cornflowerblue;
+  /* Always white in both themes — the badge sits over the darkened poem image */
+  color: #fff;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-indent: 0;
+  text-shadow: none;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 1),
+    0 0 3px rgba(0, 0, 0, 1);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.admin-grid-card-img-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.admin-grid-card-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(var(--img-brightness-overlay));
+  transition: transform 0.35s ease;
+}
+
+.admin-grid-item:hover .admin-grid-card-img-wrap img {
+  transform: scale(1.04);
+}
+
+.admin-grid-card-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  /* Left-aligned like the public grid, carousel and detail overlays, but the block itself
+     stays centred on the card so short poems don't strand against the left edge. */
+  align-items: center;
+  justify-content: safe center;
+  color: #fff;
+  text-align: left;
+  padding: 16px 10px;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Esteban", serif;
+  overflow: hidden;
+  /* Extra top padding clears the absolutely-positioned FEATURED/FEATURE? badge */
+  padding-top: 30px;
+  -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 90%);
+  mask-image: linear-gradient(to bottom, black 55%, transparent 90%);
+  pointer-events: none;
+}
+
+.admin-grid-card-title {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+/* ===== ADMIN LANGUAGE TOGGLE ===== */
+/* Only the admin portal has this. The public site's language comes from the URL and is
+   deliberately not switchable in the UI. */
+.admin-lang-row {
+  display: flex;
+  justify-content: flex-end;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 12px 24px 0;
+}
+
+/* One border around the pair with a divider between them, so it reads as a single
+   two-state control rather than two buttons that happen to sit together. */
+.admin-lang-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  padding: 0;
+  margin: 0;
+  /* Radius on the group, not the two buttons: overflow clips the active fill to the
+     rounded corners, so the pair still reads as a single control. */
+  border-radius: var(--control-radius);
+  overflow: hidden;
+}
+
+/* Labels the group for screen readers without showing a caption */
+.admin-lang-legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.admin-lang-btn {
+  background: none;
+  border: 0;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+/* The divider — only between the two, never on the outside */
+.admin-lang-btn + .admin-lang-btn {
+  border-left: 1px solid var(--border-color);
+}
+
+.admin-lang-btn:hover:not(.is-active) {
+  color: var(--text-hover);
+}
+
+/* Inverted rather than tinted. The previous --button-bg was #f0f0f0 against a #fafafa
+   page — a 10/255 difference, so in light mode the active language looked unselected.
+   Swapping text and background reads clearly in both themes. */
+.admin-lang-btn.is-active {
+  background: var(--text-primary);
+  color: var(--bg-primary-color);
+}

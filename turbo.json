@@ -1,0 +1,16 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "env": ["VITE_API_URL", "VITE_CF_BEACON_TOKEN"]
+    },
+    "typecheck": {}
+  },
+  "globalEnv": ["E2E_TARGET", "LH_PORT", "PARITY_PORT", "SITE_URL", "WEB_PORT"]
+}

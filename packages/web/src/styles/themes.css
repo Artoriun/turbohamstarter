@@ -1,0 +1,80 @@
+/* Corner radius for every rectangular control — buttons, inputs, textareas and the
+   segmented toggles. Deliberately smaller than the 4px on the poem and admin grid cards:
+   at control size 4px reads as soft rather than squared, and the point is to take the edge
+   off rather than to round them. Circular controls — the carousel arrows, the reader's
+   scroll buttons, the admin add/delete badges — keep their own 50%. */
+:root {
+  --control-radius: 2px;
+}
+
+/* ===== LIGHT MODE (DEFAULT) ===== */
+:root {
+  /* f_auto,q_auto here for the same reason optimizeUrl() exists for poem images — these
+     are CSS backgrounds, so the JS helper can't reach them and the CI guard won't catch
+     them. Worth doing by hand: the dark parchment was a 96KB PNG and is 1.8KB as WebP.
+     No w_ transform; the layer is background-size: cover on a 100lvh box, so the source
+     needs to stay large enough for a desktop viewport. */
+  --bg-primary:
+    url("https://res.cloudinary.com/dgk299isx/image/upload/f_auto,q_auto/v1781887604/parchment-bg-white_p9qsg6.jpg"),
+    #fafafa;
+  --bg-primary-color: #fafafa;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #f0f0f0;
+  --text-primary: #2c2c2c;
+  --text-secondary: #555555;
+  /* The lightest grey that still clears WCAG AA on #fafafa: 4.54:1, where #888888 was
+     3.40:1. Deliberately the minimum rather than something safely darker — this is the
+     recessive label colour (subtitle, TOC heading, footer) and it should stay quiet. */
+  --text-tertiary: #737373;
+  /* Darker than the rest of the light-mode scale suggests, on purpose: this is used for
+     body text (links, the contact confirmation) and the hamburger bars, and the old
+     #aaaaaa gave only 2.3:1 against the #fafafa background — below the 4.5:1 WCAG AA
+     minimum. #6f6f6f is 4.8:1. */
+  --text-light: #6f6f6f;
+  --text-hover: #000000;
+  --border-color: #0e0a0a;
+  --input-bg: #ffffff;
+  --input-border: #cccccc;
+  --input-border-focus: #999999;
+  --button-bg: #f0f0f0;
+  --button-bg-hover: #e0e0e0;
+  --button-text: #1a1a1a;
+  --button-text-hover: #000000;
+  --header-bg: #ffffff;
+  --footer-bg: #ffffff;
+  --dropdown-bg: #f8f8f8;
+  --arrow-color: #ffffff;
+  --img-brightness: 0.92;
+  --img-brightness-overlay: 0.78;
+}
+
+/* ===== DARK MODE ===== */
+html.dark-mode {
+  --bg-primary:
+    url("https://res.cloudinary.com/dgk299isx/image/upload/f_auto,q_auto/v1781889359/parchment-bg-black_kcspmh.png"),
+    #1a1a1a;
+  --bg-primary-color: #1a1a1a;
+  --bg-secondary: #222222;
+  --bg-tertiary: #2a2a2a;
+  --text-primary: #ccc;
+  --text-secondary: #999;
+  /* Darkest grey that still clears AA on #1a1a1a: 4.53:1, where #777 was 3.89:1. This
+     failed in dark mode too, not only light. */
+  --text-tertiary: #828282;
+  --text-light: #aaa;
+  --text-hover: #fff;
+  --border-color: #2a2a2a;
+  --input-bg: #252525;
+  --input-border: #2a2a2a;
+  --input-border-focus: #555;
+  --button-bg: #333;
+  --button-bg-hover: #444;
+  --button-text: #ddd;
+  --button-text-hover: #fff;
+  --header-bg: #1a1a1a;
+  --footer-bg: #1a1a1a;
+  --dropdown-bg: #1e1e1e;
+  --arrow-color: #ffffff;
+  --img-brightness: 0.82;
+  --img-brightness-overlay: 0.68;
+}
