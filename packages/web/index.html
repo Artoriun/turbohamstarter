@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Root-relative, not "favicon.svg": prerendered nested routes (e.g. /about/) are
+         served as their own directory index, so a relative href would resolve against
+         /about/ and 404. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+
+    <!-- Images are served by Cloudinary, so start the handshake before the markup
+         references one. Harmless if you swap image hosts — delete it then. -->
+    <link rel="preconnect" href="https://res.cloudinary.com" />
+
+    <title>TurboHamstarter</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
