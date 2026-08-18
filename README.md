@@ -17,6 +17,9 @@ Every service it touches has a free tier, so the running cost is a hamster-appro
 > Prefer Vue? The same starter, same features:
 > [turbohamstarter-vue](https://github.com/Artoriun/turbohamstarter-vue).
 
+> **Pre-1.0 — a reference implementation, not a dependency.** The schema, the API and the layout
+> of the packages still change breakingly, with no migrations between versions until 1.0.
+
 ---
 
 ## Lighthouse
