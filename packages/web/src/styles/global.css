@@ -1,0 +1,1942 @@
+/* ---------------------------------------------------------------------------
+   Fonts, declared here rather than imported from Fontsource's stylesheet.
+
+   Two reasons, both of which were visible on the page.
+
+   font-display: optional instead of swap. Fontsource ships swap, and the browser only
+   discovers the file after fetching and parsing the CSS — so the first paint used the
+   fallback and the text reflowed when the real font landed, moving the h1 by 54px about
+   1.7s in. `optional` never swaps: if the font is not ready almost immediately the
+   fallback is kept for that page view, and the font is used from the first paint on every
+   later visit once it is cached. Combined with the preload the prerenderer injects, it is
+   normally ready in time.
+
+   Latin only. Fontsource declares eleven subsets — cyrillic, greek, vietnamese, symbols —
+   totalling 164KB, none of which this content uses; Japanese has no Geist glyphs at all
+   and falls through to a system face, which the unicode-range below makes explicit.
+
+   The italic is a real one. Only the upright files were being shipped before, so the
+   accent clause in the hero was rendered as synthesised oblique — a sheared upright rather
+   than the drawn italic.
+   --------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Geist Variable";
+  font-style: normal;
+  font-display: optional;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/geist/files/geist-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Geist Variable";
+  font-style: italic;
+  font-display: optional;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/geist/files/geist-latin-wght-italic.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Geist Mono Variable";
+  font-style: normal;
+  font-display: optional;
+  font-weight: 100 900;
+  src: url("@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2")
+    format("woff2-variations");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------------------------------------------------------------------------
+   Design tokens for the site's own palette.
+
+     #FAFAF8  page          warm off-white, not pure white
+     #0C343D  ink           deep teal; also the inverted section background
+     #2A4F57  ink-soft      secondary text
+     #6B7A7E  muted         captions and meta
+     #42B2AE  accent        the one saturated colour, used sparingly
+     #FFFFFF  card          raised surfaces sit brighter than the page
+
+   Type is Geist, with Geist Mono for the small uppercase labels. Both are
+   self-hosted through Fontsource: a Google Fonts link is a render-blocking
+   request to a third party, which would undo the Largest Contentful Paint work
+   this starter is otherwise careful about.
+   --------------------------------------------------------------------------- */
+:root {
+  --bg: #fafaf8;
+  --bg-subtle: #ffffff;
+  --text: #0c343d;
+  --text-soft: #2a4f57;
+  --text-muted: #647276;
+  --accent: #42b2ae;
+  /* The brand green is a 2.5:1 contrast against the page — fine as a border, a focus ring
+     or a background, well under the 4.5:1 that text needs. So text gets the same hue
+     darkened to 4.75:1 and --accent keeps its job everywhere contrast does not apply.
+     Darkening --accent itself would have changed the look of the whole site to fix a
+     handful of words. In dark mode the accent is already 10.3:1, so the two are the
+     same colour there. */
+  --accent-text: #2d7b77;
+  --accent-contrast: #ffffff;
+  /* Pulled straight from the mascot's own sprite (its ear/nose fill), not invented — a
+     second hue for decorative-only accents (eyebrow rules, link underlines) so the palette
+     isn't a single saturated colour repeated everywhere. Never used for text: at this
+     lightness it does not clear 4.5:1 against either --bg or --bg-subtle. */
+  --accent-2: #e88fa0;
+  --ink: #0c343d;
+  --border: #e4e5e0;
+  --danger: #b3261e;
+  --header-height: 68px;
+  --measure: 68ch;
+  --radius: 8px;
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* Dark mode is a genuine dark theme, not the ink colour used as a background: #0C343D is
+   a mid-tone and reads as a navy panel rather than as dark. This drops to near-black with
+   the same teal cast, so the accent still belongs to it.
+   Every pair below was measured rather than eyeballed — the tightest is muted text on a
+   raised card at 6.2:1, comfortably past AA's 4.5. */
+html.dark-mode {
+  --bg: #060f12;
+  --bg-subtle: #0d1b20;
+  --text: #eaf2f2;
+  --text-soft: #b9caca;
+  --text-muted: #8b9d9f;
+  --accent: #5fd0c8;
+  --accent-text: #5fd0c8;
+  --accent-contrast: #04231d;
+  --accent-2: #e88fa0;
+  --ink: #eaf2f2;
+  --border: #1b3239;
+  --danger: #ff6b6b;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  /* Only these two: transitioning `all` would animate layout properties during the theme
+     swap and cause a visible reflow. */
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: var(--accent-text);
+}
+
+/* Visible focus for keyboard users, suppressed for mouse clicks. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Layout
+   --------------------------------------------------------------------------- */
+.site {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 20px 64px;
+}
+
+/* Not measure-width: text and non-text content (the carousel, section images) share one
+   column, so a reading-width cap here would squeeze both alike — .main-content already caps
+   the page at 1080px, which is the only width limit .page needs. */
+.page {
+  width: 100%;
+  margin-inline: auto;
+}
+
+/* The portal is a wide editing grid, not prose, and a 68ch column would make it unusable. */
+.page.admin {
+  max-width: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Landing entrance — the animation for a page arrived at directly, by refresh or
+   by URL. Navigating between pages is Motion's job (PageTransition); this is CSS
+   because on the landing page there is no Motion tree at all, and because CSS
+   starts on the first frame rather than waiting for React to hydrate.
+
+   Transform only. Never opacity: the prerendered text paints at ~12ms, and an
+   element at opacity 0 is not a Largest Contentful Paint candidate, so fading it
+   in hands back exactly the head start the prerendering exists to buy. A rise
+   from 10px animates on the compositor without ever hiding anything.
+
+   `.page > *` is the Item wrappers on the section pages and the prose elements
+   on the rest, so one rule staggers both.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  .page-landing .page > * {
+    animation: page-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .page-landing .page > *:nth-child(2) {
+    animation-delay: 0.07s;
+  }
+  .page-landing .page > *:nth-child(3) {
+    animation-delay: 0.14s;
+  }
+  .page-landing .page > *:nth-child(4) {
+    animation-delay: 0.21s;
+  }
+  /* Capped rather than continued: past the fourth element the page is scrolled
+     out of view anyway, and a delay long enough to matter reads as a stall. */
+  .page-landing .page > *:nth-child(n + 5) {
+    animation-delay: 0.28s;
+  }
+}
+
+@keyframes page-rise {
+  from {
+    transform: translateY(10px);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Header
+   --------------------------------------------------------------------------- */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 8px;
+  padding: 8px 14px;
+  background: var(--accent-text);
+  color: var(--accent-contrast);
+  border-radius: var(--radius);
+  z-index: 100;
+}
+.skip-link:focus {
+  left: 12px;
+}
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+  min-height: var(--header-height);
+}
+
+/* Wordmark. The mascot supplies the colour, so the type stays monochrome and tight —
+   putting an accent on both would leave the header competing with itself. "Hamstarter" is
+   the half that carries the name, so it takes the weight while "Turbo" sits back. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  color: var(--text);
+}
+/* Sprite playback.
+   Sixteen poses drive four idles: a sway, a nose twitch after every five sways, the
+   hamster bolting off-screen at fifteen, and falling asleep at twenty-five before waking
+   with a start. The twitch and the sleep both shut the eyes — a one-pixel eye cannot show
+   open versus closed by shape, so a shut eye is a two-pixel dash rather than a dot.
+
+   Written out step by step rather than driven by steps() for two reasons. The order is not
+   monotonic — it returns to neutral between moves and jumps around the sheet — so it
+   cannot be expressed as a walk across it. And the frames are deliberately unequal: a sway
+   holds half a second, a running frame twelve hundredths, the empty frame two seconds and
+   a sleeping breath over one, which is what separates idling from bolting from dozing.
+
+   step-end holds each pose for its whole slice instead of interpolating to the next, which
+   is what keeps it stepped rather than sliding.
+
+   Sized at exactly 2x the 16x15 grid so every source pixel maps to a whole number of device
+   pixels; a fractional scale is what makes pixel art look soft. */
+/* .hamster-scene-mascot (the page illustrations, see HamsterScene.tsx) shares every one of
+   these rules with the header — same sprite sheet, same background-position math, same
+   `hamster-idle` keyframes below — so its animation is the literal same one the header
+   plays, not a re-derived approximation of it. Only sizing/positioning differ, since the
+   header is fixed-size chrome and the illustrations scale with .hamster-scene. */
+.mascot,
+.hamster-scene-mascot {
+  background-image: url("../assets/hamster-sprite.svg");
+  background-repeat: no-repeat;
+  background-size: 1600% 100%;
+  image-rendering: pixelated;
+  animation: hamster-idle 72.73s step-end infinite;
+  /* The accent lives here rather than in the outline. Two shadows: a tight one that reads
+     as a rim on the pixels, and a wider soft one for the bloom — a single large shadow just
+     looks like a blur. drop-shadow follows the sprite's alpha, so it traces the silhouette
+     rather than boxing the element the way box-shadow would. color-mix rather than a
+     hardcoded rgb() so this tracks --accent's own per-theme value instead of silently
+     staying pinned to light mode's shade once dark mode changes it. */
+  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--accent) 55%, transparent))
+    drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 30%, transparent));
+}
+.mascot {
+  display: inline-block;
+  width: 32px;
+  height: 30px;
+}
+/* A glow only reads as a glow where it is lighter than what is behind it — true against
+   dark mode's near-black background, but the same values on light mode's near-white page
+   just look like a dark rim, since nothing can be "brighter" than that. Compensating with
+   a third, wider shadow and higher opacity throughout: it cannot win on luminosity, so it
+   wins on size and saturation instead. */
+html:not(.dark-mode) .mascot,
+html:not(.dark-mode) .hamster-scene-mascot {
+  filter: drop-shadow(0 0 1px color-mix(in srgb, var(--accent) 75%, transparent))
+    drop-shadow(0 0 5px color-mix(in srgb, var(--accent) 55%, transparent))
+    drop-shadow(0 0 11px color-mix(in srgb, var(--accent) 35%, transparent));
+}
+
+@keyframes hamster-idle {
+  0.0% {
+    background-position: 0.0% 0;
+  }
+  0.6875% {
+    background-position: 6.6667% 0;
+  }
+  1.3749% {
+    background-position: 13.3333% 0;
+  }
+  2.0624% {
+    background-position: 6.6667% 0;
+  }
+  2.7499% {
+    background-position: 0.0% 0;
+  }
+  3.4374% {
+    background-position: 6.6667% 0;
+  }
+  4.1248% {
+    background-position: 13.3333% 0;
+  }
+  4.8123% {
+    background-position: 6.6667% 0;
+  }
+  5.4998% {
+    background-position: 0.0% 0;
+  }
+  6.1873% {
+    background-position: 6.6667% 0;
+  }
+  6.8747% {
+    background-position: 13.3333% 0;
+  }
+  7.5622% {
+    background-position: 6.6667% 0;
+  }
+  8.2497% {
+    background-position: 0.0% 0;
+  }
+  8.9372% {
+    background-position: 6.6667% 0;
+  }
+  9.6246% {
+    background-position: 13.3333% 0;
+  }
+  10.3121% {
+    background-position: 6.6667% 0;
+  }
+  10.9996% {
+    background-position: 0.0% 0;
+  }
+  11.6871% {
+    background-position: 6.6667% 0;
+  }
+  12.3745% {
+    background-position: 13.3333% 0;
+  }
+  13.062% {
+    background-position: 6.6667% 0;
+  }
+  13.7495% {
+    background-position: 26.6667% 0;
+  }
+  14.2995% {
+    background-position: 20.0% 0;
+  }
+  14.8494% {
+    background-position: 33.3333% 0;
+  }
+  15.3994% {
+    background-position: 20.0% 0;
+  }
+  15.9494% {
+    background-position: 0.0% 0;
+  }
+  16.6369% {
+    background-position: 6.6667% 0;
+  }
+  17.3244% {
+    background-position: 13.3333% 0;
+  }
+  18.0118% {
+    background-position: 6.6667% 0;
+  }
+  18.6993% {
+    background-position: 0.0% 0;
+  }
+  19.3868% {
+    background-position: 6.6667% 0;
+  }
+  20.0742% {
+    background-position: 13.3333% 0;
+  }
+  20.7617% {
+    background-position: 6.6667% 0;
+  }
+  21.4492% {
+    background-position: 0.0% 0;
+  }
+  22.1367% {
+    background-position: 6.6667% 0;
+  }
+  22.8241% {
+    background-position: 13.3333% 0;
+  }
+  23.5116% {
+    background-position: 6.6667% 0;
+  }
+  24.1991% {
+    background-position: 0.0% 0;
+  }
+  24.8866% {
+    background-position: 6.6667% 0;
+  }
+  25.574% {
+    background-position: 13.3333% 0;
+  }
+  26.2615% {
+    background-position: 6.6667% 0;
+  }
+  26.949% {
+    background-position: 0.0% 0;
+  }
+  27.6365% {
+    background-position: 6.6667% 0;
+  }
+  28.3239% {
+    background-position: 13.3333% 0;
+  }
+  29.0114% {
+    background-position: 6.6667% 0;
+  }
+  29.6989% {
+    background-position: 26.6667% 0;
+  }
+  30.2489% {
+    background-position: 20.0% 0;
+  }
+  30.7988% {
+    background-position: 33.3333% 0;
+  }
+  31.3488% {
+    background-position: 20.0% 0;
+  }
+  31.8988% {
+    background-position: 0.0% 0;
+  }
+  32.5863% {
+    background-position: 6.6667% 0;
+  }
+  33.2738% {
+    background-position: 13.3333% 0;
+  }
+  33.9612% {
+    background-position: 6.6667% 0;
+  }
+  34.6487% {
+    background-position: 0.0% 0;
+  }
+  35.3362% {
+    background-position: 6.6667% 0;
+  }
+  36.0236% {
+    background-position: 13.3333% 0;
+  }
+  36.7111% {
+    background-position: 6.6667% 0;
+  }
+  37.3986% {
+    background-position: 0.0% 0;
+  }
+  38.0861% {
+    background-position: 6.6667% 0;
+  }
+  38.7735% {
+    background-position: 13.3333% 0;
+  }
+  39.461% {
+    background-position: 6.6667% 0;
+  }
+  40.1485% {
+    background-position: 0.0% 0;
+  }
+  40.836% {
+    background-position: 6.6667% 0;
+  }
+  41.5234% {
+    background-position: 13.3333% 0;
+  }
+  42.2109% {
+    background-position: 6.6667% 0;
+  }
+  42.8984% {
+    background-position: 0.0% 0;
+  }
+  43.5859% {
+    background-position: 6.6667% 0;
+  }
+  44.2733% {
+    background-position: 13.3333% 0;
+  }
+  44.9608% {
+    background-position: 6.6667% 0;
+  }
+  45.6483% {
+    background-position: 26.6667% 0;
+  }
+  46.1983% {
+    background-position: 20.0% 0;
+  }
+  46.7482% {
+    background-position: 33.3333% 0;
+  }
+  47.2982% {
+    background-position: 20.0% 0;
+  }
+  47.8482% {
+    background-position: 40.0% 0;
+  }
+  48.0132% {
+    background-position: 46.6667% 0;
+  }
+  48.1782% {
+    background-position: 53.3333% 0;
+  }
+  48.3432% {
+    background-position: 60.0% 0;
+  }
+  51.3681% {
+    background-position: 66.6667% 0;
+  }
+  51.4918% {
+    background-position: 73.3333% 0;
+  }
+  51.6156% {
+    background-position: 80.0% 0;
+  }
+  51.7393% {
+    background-position: 6.6667% 0;
+  }
+  52.4268% {
+    background-position: 0.0% 0;
+  }
+  53.1143% {
+    background-position: 6.6667% 0;
+  }
+  53.8017% {
+    background-position: 13.3333% 0;
+  }
+  54.4892% {
+    background-position: 6.6667% 0;
+  }
+  55.1767% {
+    background-position: 0.0% 0;
+  }
+  55.8642% {
+    background-position: 6.6667% 0;
+  }
+  56.5516% {
+    background-position: 13.3333% 0;
+  }
+  57.2391% {
+    background-position: 6.6667% 0;
+  }
+  57.9266% {
+    background-position: 0.0% 0;
+  }
+  58.6141% {
+    background-position: 6.6667% 0;
+  }
+  59.3015% {
+    background-position: 13.3333% 0;
+  }
+  59.989% {
+    background-position: 6.6667% 0;
+  }
+  60.6765% {
+    background-position: 0.0% 0;
+  }
+  61.3639% {
+    background-position: 6.6667% 0;
+  }
+  62.0514% {
+    background-position: 13.3333% 0;
+  }
+  62.7389% {
+    background-position: 6.6667% 0;
+  }
+  63.4264% {
+    background-position: 0.0% 0;
+  }
+  64.1138% {
+    background-position: 6.6667% 0;
+  }
+  64.8013% {
+    background-position: 13.3333% 0;
+  }
+  65.4888% {
+    background-position: 6.6667% 0;
+  }
+  66.1763% {
+    background-position: 26.6667% 0;
+  }
+  66.7262% {
+    background-position: 20.0% 0;
+  }
+  67.2762% {
+    background-position: 33.3333% 0;
+  }
+  67.8262% {
+    background-position: 20.0% 0;
+  }
+  68.3762% {
+    background-position: 0.0% 0;
+  }
+  69.0637% {
+    background-position: 6.6667% 0;
+  }
+  69.7511% {
+    background-position: 13.3333% 0;
+  }
+  70.4386% {
+    background-position: 6.6667% 0;
+  }
+  71.1261% {
+    background-position: 0.0% 0;
+  }
+  71.8136% {
+    background-position: 6.6667% 0;
+  }
+  72.501% {
+    background-position: 13.3333% 0;
+  }
+  73.1885% {
+    background-position: 6.6667% 0;
+  }
+  73.876% {
+    background-position: 0.0% 0;
+  }
+  74.5635% {
+    background-position: 6.6667% 0;
+  }
+  75.2509% {
+    background-position: 13.3333% 0;
+  }
+  75.9384% {
+    background-position: 6.6667% 0;
+  }
+  76.6259% {
+    background-position: 0.0% 0;
+  }
+  77.3134% {
+    background-position: 6.6667% 0;
+  }
+  78.0008% {
+    background-position: 13.3333% 0;
+  }
+  78.6883% {
+    background-position: 6.6667% 0;
+  }
+  79.3758% {
+    background-position: 0.0% 0;
+  }
+  80.0632% {
+    background-position: 6.6667% 0;
+  }
+  80.7507% {
+    background-position: 13.3333% 0;
+  }
+  81.4382% {
+    background-position: 6.6667% 0;
+  }
+  82.1257% {
+    background-position: 26.6667% 0;
+  }
+  82.6756% {
+    background-position: 20.0% 0;
+  }
+  83.2256% {
+    background-position: 33.3333% 0;
+  }
+  83.7756% {
+    background-position: 20.0% 0;
+  }
+  84.3256% {
+    background-position: 86.6667% 0;
+  }
+  86.113% {
+    background-position: 93.3333% 0;
+  }
+  87.9005% {
+    background-position: 86.6667% 0;
+  }
+  89.6879% {
+    background-position: 93.3333% 0;
+  }
+  91.4753% {
+    background-position: 86.6667% 0;
+  }
+  93.2628% {
+    background-position: 93.3333% 0;
+  }
+  95.0502% {
+    background-position: 86.6667% 0;
+  }
+  96.8376% {
+    background-position: 93.3333% 0;
+  }
+  98.6251% {
+    background-position: 100.0% 0;
+  }
+  99.175% {
+    background-position: 6.6667% 0;
+  }
+}
+
+/* No hover or focus rule on the mascot, deliberately.
+   Speeding the sequence up on hover meant that pointing at the wordmark — or clicking it,
+   which leaves the pointer sitting there — made TurboHam suddenly tear through his idle,
+   and on a touch device the hover state sticks after the tap so he never slowed down
+   again. He keeps his own time. */
+
+.brand-word {
+  font-size: 1.0625rem;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.brand-turbo {
+  font-weight: 400;
+  color: var(--text-soft);
+}
+.brand-ham {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text-soft);
+  font-size: 0.9375rem;
+  padding: 6px 0;
+  border-bottom: 1.5px solid transparent;
+}
+.nav-link {
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease;
+}
+.nav-link:hover {
+  color: var(--text);
+}
+.nav-link.is-active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 4px;
+}
+
+/* Header controls.
+   Deliberately not the bordered pill the rest of the page uses for buttons — the source
+   design uses that shape here too, and repeating it made the header read as a copy. These
+   are chromeless instead: no border and no fill until you interact, so the header stays
+   quiet and the only boxed thing in it is a real call to action.
+
+   The language pair is one segmented control rather than two buttons, which also stops it
+   reading as a row of pills. */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+.theme-toggle:hover {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text);
+}
+.theme-toggle:active {
+  transform: scale(0.92);
+}
+.theme-toggle svg {
+  width: 15px;
+  height: 15px;
+  /* currentColor is what makes this monochrome: ink on light, off-white on dark, with no
+     second value to keep in step. */
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+}
+.lang-btn {
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  /* Not --text-muted: the track behind these sits at 7% ink, darker than the page, which
+     drops muted text to 4.19:1. The inactive language still reads as inactive — the
+     selected one gets the raised white pill and full --text. */
+  color: var(--text-soft);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 5px 9px;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+.lang-btn:hover {
+  color: var(--text);
+}
+.lang-btn.is-active {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+.theme-toggle:active,
+.lang-btn:active {
+  transform: scale(0.94);
+}
+
+/* Hamburger, shown only on narrow viewports.
+   Animated in CSS rather than with Motion on purpose: the header is in the prerendered
+   markup, and Motion would write an inline style there that hydration disagrees about.
+   A transition costs nothing and touches no attribute React compares. */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 8px;
+}
+.nav-toggle-bar {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition:
+    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.18s ease;
+}
+/* Driven off aria-expanded, so the state the assistive tech reads and the state the
+   animation reads cannot drift apart. */
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0.4);
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+@media (max-width: 640px) {
+  .nav-toggle {
+    display: flex;
+  }
+  .site-nav {
+    position: absolute;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 0 20px;
+    background: var(--bg);
+    border-bottom: 1px solid transparent;
+    /* visibility, not display: display cannot be transitioned, but visibility can be
+       delayed until the collapse finishes — and unlike opacity alone it also takes the
+       links out of the tab order while the menu is shut. */
+    max-height: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition:
+      max-height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s ease,
+      padding 0.28s ease,
+      visibility 0s linear 0.28s;
+  }
+  .site-nav.is-open {
+    max-height: 320px;
+    opacity: 1;
+    visibility: visible;
+    padding: 16px 20px 20px;
+    border-bottom-color: var(--border);
+    transition:
+      max-height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s ease 0.04s,
+      padding 0.28s ease,
+      visibility 0s;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Content
+   --------------------------------------------------------------------------- */
+.hero {
+  padding: 48px 0 56px;
+  max-width: 100%;
+}
+/* 93.6px at 1440 on the source, with line-height 1.02 and -0.03em tracking. clamp keeps
+   the same proportions down to a phone rather than pinning one size. */
+.hero h1 {
+  font-size: clamp(2.5rem, 6.5vw, 5.85rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+  margin: 0 0 20px;
+  max-width: 16ch;
+}
+
+/* The headline's second clause is italic and accent-coloured on the source. */
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent-text);
+}
+/* A single-heading page (Contact, Privacy, a project detail page) has no numbered eyebrow
+   to carry the coral accent, so the heading carries it directly — the same short rule the
+   eyebrow uses, sitting to the left of the text and centred on it, not above or below.
+   float rather than flex: a flex row centres the rule against the item's full height, which
+   on a narrow viewport is both wrapped lines — the rule would float in the gap between them
+   instead of sitting on the first. A float only ever shares space with the first line a
+   block of text wraps to, which is exactly the "centred on the first line" this needs, and
+   needs no JS or line-counting to get there. The `lh` unit centres the rule against the
+   heading's own line-height, so this holds regardless of which page's h1 uses it. */
+.title-accent::before {
+  content: "";
+  float: left;
+  width: 28px;
+  height: 3px;
+  margin-top: calc(0.5lh - 1.5px);
+  margin-right: 16px;
+  background: var(--accent-2);
+}
+/* pre-line so newlines written into the copy survive. The Japanese hero breaks at each
+   sentence, which is ordinary in Japanese typography; HTML would otherwise collapse them
+   into spaces. Copy without newlines — the English hero — is unaffected. Meta descriptions
+   are unaffected too: describe() collapses whitespace before it builds them. */
+.lead {
+  white-space: pre-line;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--text-soft);
+}
+
+/* The small mono labels above each block — "01 — Manifesto" on the source. Set in the
+   mono face at 10px with wide tracking, which is what makes them read as annotation
+   rather than as a heading. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.eyebrow::before {
+  content: "";
+  width: 18px;
+  height: 2px;
+  background: var(--accent-2);
+}
+/* The hero's own eyebrow gets a two-tone chip instead of the numbered sections' plain rule
+   — the one spot on the page that gets a bit of the mascot's own pixel-art texture rather
+   than a straight line. Still a single ::before, no extra markup: a hard-stopped gradient
+   reads as two small squares. */
+.hero .eyebrow::before {
+  width: 12px;
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    var(--accent-2) 0 45%,
+    transparent 45% 55%,
+    var(--ink) 55% 100%
+  );
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+/* The hero's secondary action reads as a text link rather than a second bordered button —
+   two same-shaped buttons side by side is the one convention this restyles. Scoped to
+   .hero-actions rather than changing .btn itself, since .btn/.btn-primary are reused
+   throughout the admin portal and should stay untouched there. */
+.hero-actions .btn:not(.btn-primary) {
+  border: none;
+  background: transparent;
+  padding: 0;
+  height: auto;
+  text-decoration: underline;
+  text-decoration-color: var(--accent-2);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+}
+
+/* HamsterCoding (About), HamsterWriting (Contact) and HamsterLawyer (Privacy) share this: a
+   fixed 32:20 layout scaled by width alone via aspect-ratio, so it can never end up
+   disproportionate on a narrow viewport. clamp rather than a flat percentage so it stays
+   readable on a phone (180px floor) without dominating a wide desktop (340px ceiling).
+   position: relative because the mascot itself (.hamster-scene-mascot below) is a real
+   HTML element layered over the props SVG, not drawn inside it — see the note by
+   .hamster-scene-mascot for why. */
+.hamster-scene {
+  position: relative;
+  width: clamp(120px, 16vw, 200px);
+  aspect-ratio: 32 / 20;
+  margin: 32px auto;
+}
+/* The scene's desk + per-illustration props (screen/paper/gavel) — everything HamsterScene
+   passes through except the mascot itself. Same 32×20 coordinate space the mascot's
+   position below is measured against. */
+.hamster-scene-props {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* The mascot, positioned to sit where it used to sit inside the props SVG above (translate
+   2,2 on a 16×15 grid within a 32×20 scene: left/top 2/32 & 2/20, width/height 16/32 &
+   15/20) — but as a real element carrying .mascot's own background-image + `hamster-idle`
+   animation (see the shared rule above) rather than pixel data re-drawn as SVG rects. A
+   copy of the header's markup, not a re-derivation of its animation: this is what makes it
+   the exact same sequence of poses, not an approximation of it. */
+.hamster-scene-mascot {
+  position: absolute;
+  left: 6.25%;
+  top: 10%;
+  width: 50%;
+  height: 75%;
+}
+@keyframes hamster-scene-alt-a {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes hamster-scene-alt-b {
+  0%,
+  45% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+.coding-screen-a,
+.writing-a,
+.lawyer-gavel-a {
+  animation: hamster-scene-alt-a 2.4s step-end infinite;
+}
+.coding-screen-b,
+.writing-b,
+.lawyer-gavel-b {
+  animation: hamster-scene-alt-b 2.4s step-end infinite;
+}
+
+.content-section {
+  padding: 40px 0;
+  border-top: 1px solid var(--border);
+}
+
+/* The rule is a separator *between* sections, so the first one on a page must not have it
+   — on /about that put a stray line above the page's own heading, with nothing above it to
+   divide from. :first-child alone does not reach it: every section sits inside its own
+   wrapper div (the stagger item), so it is always the first child of that wrapper. The
+   page container is the level where "first" actually means something. */
+.page > :first-child .content-section {
+  border-top: none;
+  padding-top: 0;
+}
+/* Same fix, same reasoning, for a page whose actual first child is an illustration
+   (About's HamsterCoding) rather than the first section itself — :first-child above no
+   longer reaches the first section once something else sits ahead of it in the DOM. */
+.hamster-scene + * .content-section {
+  border-top: none;
+  padding-top: 0;
+}
+/* Every page title teal, except the home page's own hero — "...Was just Hamstarted!" —
+   which keeps its default ink colour (only its second clause is accent-coloured, via
+   .hero h1 em above). --accent-text rather than --accent: the raw teal is only 2.5:1
+   against the page background in light mode, under the 3:1 large-text needs; --accent-text
+   is the same colour darkened to meet it (see its definition), and equals --accent outright
+   in dark mode where the raw value already clears contrast. */
+h1,
+h2 {
+  color: var(--accent-text);
+}
+.hero h1 {
+  color: var(--text);
+}
+h2 {
+  font-size: clamp(1.75rem, 3.6vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+.content-section h2 {
+  margin: 0 0 10px;
+}
+/* Same reasoning and the same cap as .carousel-frame: at 1080px wide, an image anywhere
+   near 16:9 is already 600px+ tall, which can be taller than the whole viewport on a
+   short one. max-height alone is enough here (unlike .carousel-frame, which needs an
+   explicit max-width too) because this is a real <img> — a replaced element's max-height
+   shrinks its rendered width in step to keep its own intrinsic ratio, no separate
+   calculation needed. */
+.section-image {
+  max-height: min(58vh, 620px);
+  margin-inline: auto;
+  border-radius: var(--radius);
+  margin-bottom: 14px;
+  display: block;
+}
+
+/* ---------------------------------------------------------------------------
+   Project carousel — the home page's 'projects' sections, auto-cycling.
+
+   The overlay text sits on a photo, not the page background, so it is styled with fixed
+   colours rather than the --text/--ink tokens: those tokens flip between dark-on-light and
+   light-on-dark for the *page* theme, which has nothing to do with what is legible over an
+   arbitrary image. The scrim gradient exists so that contrast holds regardless of theme or
+   image content.
+   --------------------------------------------------------------------------- */
+.project-carousel {
+  margin-bottom: 8px;
+}
+/* The viewport that clips the sliding track. Spans .page's full width (see the .page
+   comment above) rather than a single fixed-width frame, so however many cards fit at
+   ITEM_WIDTH + gap actually show side by side — "as many as fit the viewport". */
+.carousel-frame {
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+}
+.carousel-frame.is-dragging {
+  cursor: grabbing;
+}
+/* The row of cards itself. A single `transform: translateX(...)` moves them all together —
+   see ProjectCarousel.tsx — so navigating past several cards slides the whole row smoothly
+   instead of one card popping in as the next takes over. Plain CSS, not a Motion
+   `animate` prop: the carousel can be the very first thing painted on a prerendered
+   landing page, and only a per-pointermove/per-nav style write like this one — never a
+   value written by an animation library into a deterministic render — is safe against the
+   hydration mismatch PageTransition.tsx documents. */
+.carousel-track {
+  display: flex;
+  gap: 20px;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+/* Fixed width, not responsive: ProjectCarousel.tsx's drag math needs to know exactly how
+   many pixels one card + gap is worth without measuring the DOM, and a flat px value is
+   what lets it. Same cap as before on height, so a card never grows taller than the
+   viewport on a short/landscape screen. */
+.carousel-slide {
+  display: block;
+  position: relative;
+  flex: 0 0 380px;
+  width: 380px;
+  aspect-ratio: 16 / 9;
+  max-height: min(58vh, 620px);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg-subtle);
+  color: inherit;
+  text-decoration: none;
+  /* Claims the horizontal gesture for the drag handlers below and lets a vertical one
+     fall through to the page's own scroll, rather than the drag fighting it. */
+  touch-action: pan-y;
+  /* The browser's native "drag this image" ghost would otherwise compete with pointer-
+     driven dragging below. */
+  -webkit-user-drag: none;
+}
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Same technique as .mascot: the bundled project art is a handful of large flat rects at a
+   tiny logical resolution, and scaling that up with the browser's default smoothing would
+   blur the pixel-grid edges the art depends on. */
+.pixel-img {
+  image-rendering: pixelated;
+}
+.carousel-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 20px 24px;
+  background: linear-gradient(
+    to top,
+    rgb(6 15 18 / 0.88) 0%,
+    rgb(6 15 18 / 0.6) 40%,
+    rgb(6 15 18 / 0) 75%
+  );
+}
+.carousel-overlay-title {
+  color: #fbfaf7;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+.carousel-overlay-cta {
+  color: #9fe6de;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Shown only past the point a slow connection or a cold Cloudinary transform would
+   otherwise leave the frame blank — see the effect in ProjectCarousel.tsx that decides
+   when. Sits on .carousel-frame's own background rather than a scrim, since nothing is
+   visible underneath yet for a scrim to darken. */
+.carousel-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--bg-subtle);
+}
+/* Scales with the frame instead of a fixed size — .carousel-frame can be anywhere from a
+   phone's full width to .main-content's 1080px cap, and a wheel sized for the former reads
+   as a lost speck in the latter. vw-based rather than tied to the frame's own measured
+   size, since that would need JS; the frame's width tracks the viewport closely enough
+   (both cap out together at .main-content's 1080px) that this holds in practice. */
+.carousel-loading-wheel {
+  --wheel-size: clamp(72px, 14vw, 160px);
+  position: relative;
+  width: var(--wheel-size);
+  height: var(--wheel-size);
+}
+.loading-wheel-svg {
+  width: 100%;
+  height: 100%;
+  animation: loading-wheel-spin 1.1s linear infinite;
+}
+.loading-wheel-svg circle,
+.loading-wheel-svg line {
+  fill: none;
+  stroke: var(--accent-2);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+@keyframes loading-wheel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* The mascot is drawn inline inside the same SVG as the wheel (see ProjectCarousel.tsx)
+   rather than composited on top as a separate background-image element, so it scales in
+   step with the wheel automatically — both share the same viewBox — with no separate
+   sizing rule needed here. */
+.carousel-loading-text {
+  font-family: var(--font-mono);
+  font-size: clamp(0.6875rem, 1.4vw, 0.9375rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.carousel-nav-btn,
+.carousel-pause-btn {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(6 15 18 / 0.45);
+  color: #fbfaf7;
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease,
+    transform 0.12s ease;
+}
+.carousel-nav-btn:hover,
+.carousel-pause-btn:hover {
+  background: rgb(6 15 18 / 0.65);
+}
+.carousel-nav-btn:active,
+.carousel-pause-btn:active {
+  transform: scale(0.92);
+}
+.carousel-nav-btn svg,
+.carousel-pause-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.carousel-nav-prev {
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.carousel-nav-next {
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.carousel-pause-btn {
+  top: 12px;
+  right: 12px;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+/* 24x24, not the 9px dot it looks like: that is the WCAG minimum touch target, and with
+   dots this close together a hit area sized to the visible dot fails it twice over — once
+   on its own size, once on the gap to its neighbour. The dot itself is drawn as a
+   ::before, centred in the larger, invisible button. */
+.carousel-dot {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.carousel-dot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--border);
+  transform: translate(-50%, -50%);
+}
+.carousel-dot:hover::before {
+  background: var(--text-muted);
+}
+.carousel-dot.is-active::before {
+  /* --text rather than --accent: the brand green is only 2.5:1 against the page (see the
+     token comment above), under the 3:1 a UI component needs to read as a distinct state. */
+  background: var(--text);
+}
+
+/* No reduced-motion override here: the global rule at the bottom of this file already
+   collapses every animation's and transition's duration to near-zero rather than
+   cancelling it outright, which is what still lands each of the keyframes above on its
+   `to` state instead of stalling at `from`. That covers the enter/exit keyframes and the
+   `.is-settling` transition; it deliberately does not reach the live 1:1 drag-tracking
+   itself (direct manipulation is conventionally exempt, the same as native rubber-
+   banding) or the autoplay setTimeout, which checks prefers-reduced-motion itself. */
+
+/* ---------------------------------------------------------------------------
+   Buttons and forms
+   --------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 24px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn {
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    transform 0.12s ease,
+    box-shadow 0.18s ease;
+}
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+  transform: translateY(-1px);
+}
+.btn-primary:hover {
+  background: var(--text-soft);
+  border-color: var(--text-soft);
+  color: var(--bg);
+}
+/* Snaps back under the finger, which is the only animation on a touch device that
+   reliably reads as "that registered". */
+.btn:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 0.06s;
+}
+/* Ink, not accent. The source keeps its one saturated colour for emphasis in text and
+   for rules, and fills its primary button with the same dark teal as the body copy. */
+.btn-primary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+.btn-danger {
+  background: transparent;
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.btn-icon {
+  padding: 4px 10px;
+}
+
+/* The portal is a dense form, not a landing page: the 48px call-to-action button is wrong
+   at this density. This is the header's scale — same radius and border language, smaller —
+   so the two read as one system rather than two. */
+.btn-sm {
+  height: 34px;
+  padding: 0 14px;
+  font-size: 0.875rem;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* No max-width: this fills whatever .main-content gives the page (up to 1080px), same as
+   everything else on the site now. auto-fit reflows the short fields (name/email/subject)
+   into as many columns as actually fit rather than a hardcoded pair — one column on a
+   phone, two or three as the viewport allows. Message, the honeypot, errors and the submit
+   button opt out via .field-wide, since a textarea or a button stretched to 1080px would
+   look broken rather than spacious. */
+.contact-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px 24px;
+  margin-top: 20px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field-wide {
+  grid-column: 1 / -1;
+}
+/* Grid items stretch to fill their column by default — fine for an input, wrong for a
+   button, which should stay its own content width even on the full-width row. */
+.contact-form button[type="submit"] {
+  justify-self: start;
+}
+.contact-form label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.contact-form input,
+.contact-form textarea,
+.admin select,
+.admin input,
+.admin textarea {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  width: 100%;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+/* The ring is drawn with box-shadow rather than by growing the border, so nothing reflows
+   on focus — a border-width change would nudge every field below it. */
+.contact-form input:focus,
+.contact-form textarea:focus,
+.admin input:focus,
+.admin textarea:focus,
+.admin select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.contact-form input:hover:not(:focus),
+.contact-form textarea:hover:not(:focus) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.contact-form button {
+  margin-top: 18px;
+  align-self: flex-start;
+}
+
+/* Off-screen rather than display:none — some bots skip hidden fields, which would defeat
+   the trap. aria-hidden and tabIndex=-1 keep it away from assistive tech and the keyboard. */
+.honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.form-error {
+  color: var(--danger);
+  margin: 12px 0 0;
+}
+.form-success {
+  color: var(--accent-text);
+}
+
+/* ---------------------------------------------------------------------------
+   Admin
+   --------------------------------------------------------------------------- */
+.admin-head,
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.admin-head-actions,
+.admin-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* The buttons are plain .btn.btn-sm, toggled to .btn-primary when active — the same
+   pair the rest of the portal already uses, rather than a second button style. */
+.admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.admin-status {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  min-height: 1.2em;
+}
+.admin-list {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 16px;
+}
+.admin-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  background: var(--bg-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.admin-card label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.admin-card-row {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  justify-content: space-between;
+}
+.admin-card-row select {
+  width: auto;
+}
+.admin-card-fixed {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 6px 0;
+}
+.admin-card-move {
+  display: flex;
+  gap: 6px;
+}
+.admin-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+}
+.admin-translation {
+  margin-top: 8px;
+  padding: 8px 10px 10px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.admin-translation-label {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.16em;
+  color: var(--text-muted);
+}
+
+/* A carousel card's slide list — one nested sub-card per slide, each editing its own
+   heading/body/translations/image exactly like a normal card does, one level deeper. */
+.admin-slides-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+}
+.admin-slides {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 12px;
+}
+.admin-slide {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.admin-slide label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+/* The file input is styled through ::file-selector-button rather than the usual trick of
+   hiding it behind a <label>. The native control keeps its keyboard behaviour, its
+   filename readout and its accessible name for free; the hidden version has to
+   reimplement all three. Only the button half is unstyled by default. */
+.admin-card input[type="file"] {
+  border: 0;
+  padding: 0;
+  background: none;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+.admin-card input[type="file"]::file-selector-button {
+  /* Matches .btn.btn-sm — a shared class cannot reach a pseudo-element. */
+  height: 34px;
+  padding: 0 14px;
+  margin-right: 12px;
+  border: 1px solid var(--ink);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease;
+}
+.admin-card input[type="file"]::file-selector-button:hover {
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+.admin-thumb {
+  border-radius: var(--radius);
+  margin-top: 8px;
+}
+.admin-settings {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-top: 16px;
+  background: var(--bg-subtle);
+}
+.admin-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.admin-settings-row input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.admin-settings-state {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.admin-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 4px 0 0;
+}
+.admin-warning {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  /* Amber rather than the danger red: nothing has failed yet, the text simply will not
+     save while the filter is on. */
+  color: #7a4b00;
+  background: #fff4dc;
+  border: 1px solid #e8c887;
+}
+html.dark-mode .admin-warning {
+  color: #ffd79a;
+  background: #3a2c10;
+  border-color: #6b5320;
+}
+
+.admin-signin {
+  max-width: 380px;
+}
+
+/* ---------------------------------------------------------------------------
+   Footer
+   --------------------------------------------------------------------------- */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+}
+.site-footer p {
+  margin: 0 0 4px;
+}
+
+/* ---------------------------------------------------------------------------
+   Reduced motion. Durations collapse rather than `animation: none`, because a
+   cancelled animation never reaches its final keyframe — anything that fades in
+   from opacity 0 would stay invisible. A 0.01ms animation still lands on its end
+   state, it simply does so imperceptibly.
+   --------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   The mascot's name in body copy
+   --------------------------------------------------------------------------- */
+
+/* A real button, not a styled span: it opens something, so it has to be reachable by
+   keyboard and announce its state. Inherits the copy's own size and weight so it reads as
+   part of the sentence rather than as a control dropped into it — only the colour and the
+   dotted underline mark it as pressable.
+
+   --accent-text, not --accent: this is 17px body copy, so it needs the 4.5:1 tier
+   (4.77:1 on --bg light, 10.46:1 dark). The raw --accent is 2.45:1 and fails outright. */
+.mascot-mention {
+  position: relative;
+  white-space: nowrap;
+}
+.mascot-mention-btn {
+  font: inherit;
+  color: var(--accent-text);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+.mascot-mention-btn:hover,
+.mascot-mention-btn:focus-visible {
+  text-decoration-style: solid;
+}
+
+/* Anchored to the word and centred on it, but clamped so a mention near either edge cannot
+   push the page sideways — the layout suite asserts no horizontal overflow at every
+   viewport, and an absolutely positioned popover is the easiest way to break that. */
+.mascot-pop {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: max-content;
+  max-width: min(240px, 70vw);
+  padding: 8px 10px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--rule, rgba(127, 127, 127, 0.28));
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  white-space: normal;
+}
+/* The little pointer down to the word. */
+.mascot-pop::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--bg-subtle);
+}
+.mascot-pop-sprite {
+  flex: none;
+}
+/* Available to a screen reader, invisible on screen. The sprite is a background-image and
+   aria-hidden, so deleting this outright would leave the popover announcing nothing — the
+   words are the only thing in it that a screen reader can convey. */
+.mascot-pop-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The sprite steps through sixteen poses. Someone who has asked for less movement should
+   get the first pose and nothing more — the sheet is a background-position animation, so
+   stopping it simply holds frame one. */
+@media (prefers-reduced-motion: reduce) {
+  .mascot-pop-sprite {
+    animation: none;
+  }
+}
