@@ -1,0 +1,50 @@
+# Render Blueprint for the API — so the hosting config lives in git rather than only in a
+# web dashboard. Reconcile it against the dashboard before applying it as a Blueprint.
+#
+# Node version matters here and is not incidental. The API imports from @starter/shared,
+# which ships raw TypeScript (main: src/index.ts), so the compiled dist/index.js needs a
+# runtime that strips types on load — Node 22.18+ does this natively. On Node 20 the same
+# command dies with `Unexpected token 'export'` pointing at packages/shared, with nothing
+# to indicate the real cause. packages/api declares engines.node accordingly.
+services:
+  - type: web
+    name: turbohamstarter-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: .
+    buildCommand: npm install && cd packages/api && npm run build
+    startCommand: node packages/api/dist/index.js
+    # Points at the shallow probe on purpose. /health/deps reads Firestore, and a health
+    # check that goes red when Firestore blips would have Render restart a healthy
+    # container.
+    #
+    # Render's own health check does NOT keep a free instance awake — it spins down after
+    # ~15 minutes idle regardless, and the next visitor pays a 30-60s cold start. Point a
+    # free UptimeRobot monitor at this same path every 5 minutes to prevent that. See the
+    # README section "Keeping the API awake".
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      # Render injects PORT itself; the app already reads it.
+      # sync: false means "required, but the value is not in git" — set it in the dashboard.
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_CLIENT_EMAIL
+        sync: false
+      - key: FIREBASE_PRIVATE_KEY
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: CONTACT_TO
+        sync: false

@@ -1,0 +1,46 @@
+{
+  "name": "turbohamstarter",
+  "private": true,
+  "description": "TurboRepo starter for a portfolio site on free-tier services: React + TypeScript + Vite prerendered to static HTML on GitHub Pages, an Express + Firestore admin portal on Render, Cloudinary images and Resend email. CI gates every deploy on lint, typecheck, tests, layout tests and a bundle budget.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "test:api": "node --import tsx --test \"packages/api/src/**/*.test.ts\"",
+    "test:unit": "node --import tsx --test \"packages/web/src/**/*.test.ts\" \"packages/shared/src/**/*.test.ts\"",
+    "test": "npm run test:api && npm run test:unit",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "prerender": "node scripts/prerender.mjs",
+    "check:budgets": "node scripts/check-budgets.mjs",
+    "check:lighthouse": "node scripts/check-lighthouse.mjs",
+    "hash-password": "node scripts/hash-password.mjs",
+    "check:parity": "node scripts/check-parity.mjs",
+    "test:e2e:dist": "E2E_TARGET=dist playwright test e2e/dist.spec.ts --project=desktop",
+    "ci": "node scripts/ci-local.mjs",
+    "check:workflows": "node scripts/check-workflows.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@biomejs/biome": "2.5.5",
+    "@playwright/test": "^1.62.0",
+    "lighthouse": "^12.8.2",
+    "tsx": "^4.19.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "packageManager": "npm@10.9.0",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}
